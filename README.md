@@ -135,8 +135,16 @@ The setup script will automatically:
 1. ✅ Set up environment variables
 2. ✅ Install all dependencies
 3. ✅ Build Docker image (if Docker is available)
-4. ✅ Start the development server
+4. ✅ Start the frontend container on host port 3000
 5. ✅ Open your browser to `http://localhost:3000`
+
+The container's Nginx listens on port 80 and is published as host port 3000
+(`3000:80`, on all host interfaces); use the tailnet URL
+`http://pay-jd-245-291017.tailaa2a30.ts.net:3000` for shared access (see
+[Docker Deployment](#docker-deployment)). `npm run dev` is the local Vite
+development server on `http://localhost:3000`, so stop the container before
+starting it. On a host with a public interface, restrict port 3000 as described
+in step 3 of [Docker Deployment](#docker-deployment).
 
 ## 🛠 Manual Development Setup
 
@@ -238,14 +246,15 @@ VITE_APP_ENV=self-hosted
 VITE_API_URL=https://api.example.com/v1
 ```
 
-For this production deployment (`https://front.pay.zhikaoya.cn`), create a
-separate `.env.production` instead. `.env.*` is gitignored, so that file stays
-local and must exist on every build machine:
+For this production deployment (served on the tailnet at
+`http://pay-jd-245-291017.tailaa2a30.ts.net:3000`), create a separate
+`.env.production` instead. `.env.*` is gitignored, so that file stays local and
+must exist on every build machine:
 
 ```dotenv
 VITE_APP_ENV=self-hosted
 VITE_AUTH_PROVIDER=flexprice
-VITE_API_URL=https://pay.zhikaoya.cn/v1
+VITE_API_URL=http://pay-jd-245-291017.tailaa2a30.ts.net:8080/v1
 ```
 
 Do not set `VITE_SSO_TENANT_ID` unless a single tenant should be preselected;
@@ -276,7 +285,12 @@ FRONTEND_ENV_FILE=.env.production docker compose up -d
 so the local flow above is unchanged. Keep it set for both commands so Compose
 never falls back to a `.env` that may not exist on the production build host.
 Either command builds the `production` target, injects the selected file as the
-`frontend_env` secret, and serves the app at http://localhost:3000.
+`frontend_env` secret, and publishes the container's port 80 as host port 3000
+with the mapping `3000:80`, so it is reachable locally at
+http://localhost:3000 and, on the tailnet, at
+http://pay-jd-245-291017.tailaa2a30.ts.net:3000. As with any Docker port
+mapping, `3000:80` listens on all host interfaces (IPv4 and IPv6), not only the
+tailnet; step 3 covers the firewall and ACL requirements that follow.
 
 Docker BuildKit is required. For a direct build, pass the same file explicitly:
 
@@ -296,18 +310,100 @@ docker run -d --name flexprice-frontend -p 3000:80 flexprice-frontend
 The secret keeps the dotenv file out of the image layers, while the hash
 invalidates the cached build step when the configuration changes.
 
-3. **Serve on the production domain**
+3. **Expose the container on the tailnet**
 
-The container listens on port 3000. Terminate TLS and route
-`https://front.pay.zhikaoya.cn` through the external reverse proxy to the
-container; Nginx serves the SPA and falls back to `index.html` for client-side
-routes.
+The image runs Nginx on port 80 inside the container and falls back to
+`index.html` for client-side routes. This deployment publishes that port
+directly as host port 3000 (`3000:80`, as shown above); no reverse proxy is
+required. Clients on the tailnet open
+`http://pay-jd-245-291017.tailaa2a30.ts.net:3000`, and the browser calls the API
+directly at `http://pay-jd-245-291017.tailaa2a30.ts.net:8080/v1`.
 
-SAML login returns the browser to `https://front.pay.zhikaoya.cn/auth/callback`
-(frontend route `/auth/callback`), so the backend SAML `dashboard_url` must use
-that origin and path. The API origin (`https://pay.zhikaoya.cn`) must also allow
-CORS from the frontend origin. Both are server-side settings; there is no
-frontend runtime configuration for them.
+Prerequisites on the Docker host:
+
+- Tailscale is installed and the host is signed in to the same tailnet as the
+  intended users (`tailscale up`; `tailscale status` lists the host).
+- MagicDNS is enabled in the tailnet so
+  `pay-jd-245-291017.tailaa2a30.ts.net` resolves for clients.
+- The tailnet policy (ACL) allows the intended users, groups, or devices to
+  reach this host on TCP ports 3000 (frontend) and 8080 (API). The default
+  allow-all policy already does this; a restrictive policy needs an explicit
+  grant such as:
+
+```json
+{
+  "grants": [
+    {
+      "src": ["group:flexprice-users"],
+      "dst": ["tag:flexprice-front"],
+      "ip": ["tcp:3000", "tcp:8080"]
+    }
+  ]
+}
+```
+
+Tag the Docker host `tag:flexprice-front` (or substitute your own group and
+host tag), and keep the grant scoped to those two ports. Tailscale ACLs only
+govern traffic on the tailnet; they do not protect the host's other network
+interfaces.
+
+**Exposure and firewall:** Docker publishes `3000:80` and `8080:8080` on all
+host interfaces (IPv4 and IPv6), so both ports are reachable from any network
+the host is attached to, including a public interface. Docker inserts DNAT
+rules that can bypass host firewall input rules (plain `ufw` rules, for
+example, do not reliably filter published container ports). Restrict ports 3000
+and 8080 with the cloud security group or network firewall in front of the
+host — allow them only from the tailnet or trusted networks, and verify from
+outside that both ports are closed. If the host must not be reachable outside
+the tailnet, a default-deny ingress policy for both ports is required.
+
+Open `http://pay-jd-245-291017.tailaa2a30.ts.net:3000` from any device in the
+tailnet. No `tailscale serve` or `tailscale funnel` command is needed for this
+deployment; `tailscale funnel` would additionally publish a Serve listener to
+the public internet.
+
+> **HTTP and browser secure contexts:** the deployment URL is plain HTTP, so
+> browsers do not treat it as a secure context. Secure-context-only APIs such
+> as `navigator.clipboard` and `crypto.randomUUID` may be unavailable or fail.
+> Copy-to-clipboard actions and the customer-portal top-up/invoice idempotency
+> keys rely on those APIs. If those flows are required, use the optional HTTPS
+> listener below.
+
+Optional HTTPS alternative: Tailscale Serve can terminate HTTPS on port 443
+(requires HTTPS certificates enabled for the tailnet and MagicDNS) and proxy to
+the published host port:
+
+```bash
+tailscale serve --bg --https=443 http://127.0.0.1:3000
+```
+
+That serves `https://pay-jd-245-291017.tailaa2a30.ts.net/` (port 443 is
+implicit) and provides a browser secure context. It is not the requested
+deployment URL; production access remains
+`http://pay-jd-245-291017.tailaa2a30.ts.net:3000`. If you switch to the HTTPS
+origin, rebuild the frontend with an HTTPS `VITE_API_URL`, update the backend
+CORS allowlist, and update the SAML `dashboard_url` to that HTTPS origin.
+
+Backend settings:
+
+- **CORS:** the API at `http://pay-jd-245-291017.tailaa2a30.ts.net:8080/v1`
+  must allow the exact frontend origin
+  `http://pay-jd-245-291017.tailaa2a30.ts.net:3000` — scheme, host, and port,
+  with no trailing slash. A wildcard is not sufficient when the browser sends
+  credentials.
+- **SAML:** SAML cannot be used with this plain-HTTP deployment. When the
+  backend enables SAML and its base/dashboard URL is not loopback, it requires
+  HTTPS, and browsers and most identity providers reject insecure callback
+  URLs. To enable SAML, serve the frontend over HTTPS (for example with the
+  Serve listener above), rebuild with an HTTPS `VITE_API_URL` so the API is not
+  blocked as mixed content, and set the backend SAML `dashboard_url` (callback)
+  to `https://pay-jd-245-291017.tailaa2a30.ts.net/auth/callback`; the frontend
+  handles that path with the `/auth/callback` route. Do not enable SAML on the
+  HTTP deployment.
+
+The API URL and origins are build-time or server-side settings; there is no
+frontend runtime configuration for them. The frontend bundle targets
+`http://pay-jd-245-291017.tailaa2a30.ts.net:8080/v1`.
 
 4. **GitHub Actions → Huawei SWR**
 
@@ -315,27 +411,27 @@ Pushing to `main`, or manually running the workflow from `main`, publishes a
 `linux/amd64` image built from the `production` target. Other branches are
 skipped. Workflow: `.github/workflows/build-swr.yml`.
 
-Configure these under **Settings → Secrets and variables → Actions**:
+Configure these secrets under **Settings → Secrets and variables → Actions**:
 
-| Type     | Name                  | Value                                                        |
-| -------- | --------------------- | ------------------------------------------------------------ |
-| Secret   | `SWR_USERNAME`        | Username with push access to the SWR region/org/repository   |
-| Secret   | `SWR_PASSWORD`        | Password or login token for that username                    |
-| Variable | `FRONTEND_BUILD_ENV`  | Complete dotenv contents: public `VITE_*` values only        |
+| Type   | Name           | Value                                                      |
+| ------ | -------------- | ---------------------------------------------------------- |
+| Secret | `SWR_USERNAME` | Username with push access to the SWR region/org/repository |
+| Secret | `SWR_PASSWORD` | Password or login token for that username                  |
 
-`FRONTEND_BUILD_ENV` is multiline dotenv content. For this production
-deployment it must match the local `.env.production`:
+The workflow embeds the production frontend dotenv inline; no repository
+variable is needed:
 
 ```dotenv
 VITE_APP_ENV=self-hosted
 VITE_AUTH_PROVIDER=flexprice
-VITE_API_URL=https://pay.zhikaoya.cn/v1
+VITE_API_URL=http://pay-jd-245-291017.tailaa2a30.ts.net:8080/v1
 ```
 
-The workflow reads `FRONTEND_BUILD_ENV`, not a dotenv file in the repository.
-Updating `.env.production` locally does not change the Actions variable; update
-it separately under repository settings and start a new workflow run. The
-workflow file itself needs no change.
+These are public `VITE_*` values compiled into the browser bundle. The workflow
+writes them to a temporary dotenv file at build time. To change them, edit the
+`Prepare frontend configuration` step in `.github/workflows/build-swr.yml` and
+push to `main` (or start a new workflow run). The local `.env.production` is
+independent of the workflow.
 
 The repository `swr.cn-east-3.myhuaweicloud.com/digitprint/flexprice-front` must
 already exist, and the credentials must be allowed to push to that repository.
@@ -360,8 +456,15 @@ docker run -d --name flexprice-frontend-swr -p 3000:80 \
   swr.cn-east-3.myhuaweicloud.com/digitprint/flexprice-front:latest
 ```
 
-Editing `FRONTEND_BUILD_ENV` does not affect already-built images or running
-containers; it takes effect only on a new workflow run (or a new local build).
+The container's port 80 is published as host port 3000 (`3000:80`), matching
+`docker-compose.yml` and the setup scripts, and is reachable on the tailnet at
+`http://pay-jd-245-291017.tailaa2a30.ts.net:3000` without Tailscale Serve. The
+all-interface exposure, firewall, and ACL caveats from step 3 apply to this port
+and to the API on 8080.
+
+Editing the inline dotenv in `.github/workflows/build-swr.yml` does not affect
+already-built images or running containers; it takes effect only on a new
+workflow run (or a new local build).
 SWR images are `linux/amd64`, so on ARM hosts use an amd64 machine or platform
 emulation.
 

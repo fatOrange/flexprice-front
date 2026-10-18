@@ -4,13 +4,12 @@ name: Build and push to Huawei SWR
 # serving the compiled SPA) and publishes it to Huawei SWR.
 #
 # Required repository configuration (Settings > Secrets and variables > Actions):
-#   - Variable FRONTEND_BUILD_ENV: the complete contents of the frontend
-#     `.env.production` dotenv file, including a browser-reachable VITE_API_URL
-#     and VITE_APP_ENV=self-hosted for this deployment. Only public VITE_*
-#     values belong here: they are compiled into the browser bundle. NEVER put
-#     private keys or merchant secrets in it.
 #   - Secrets SWR_USERNAME / SWR_PASSWORD: credentials allowed to push to
 #     swr.cn-east-3.myhuaweicloud.com/digitprint/flexprice-front.
+#
+# The production frontend dotenv is defined inline in the "Prepare frontend
+# configuration" step below. It contains only public VITE_* values that are
+# compiled into the browser bundle; never add private keys or merchant secrets.
 #
 # Only pushes to main and manual dispatches from main publish. The workflow is
 # deliberately not triggered by pull requests, so SWR credentials are never
@@ -45,19 +44,17 @@ jobs:
       - name: Prepare frontend configuration
         id: config
         shell: bash
-        env:
-          # Passed through the step environment, never interpolated into the
-          # script body: multiline dotenv content cannot become shell code.
-          FRONTEND_BUILD_ENV: ${{ vars.FRONTEND_BUILD_ENV }}
         run: |
-          if [[ -z "${FRONTEND_BUILD_ENV//[[:space:]]/}" ]]; then
-            echo "::error::Repository variable FRONTEND_BUILD_ENV is not configured or is empty. Set it to the complete contents of the frontend .env.production (public VITE_* values only, with a browser-reachable VITE_API_URL)."
-            exit 1
-          fi
-
+          # Public production configuration compiled into the browser bundle.
+          # Only public VITE_* values belong here; never add server or API
+          # secrets.
           umask 077
           env_file="$RUNNER_TEMP/frontend.env"
-          printf '%s' "$FRONTEND_BUILD_ENV" > "$env_file"
+          cat > "$env_file" <<'DOTENV'
+          VITE_APP_ENV=self-hosted
+          VITE_AUTH_PROVIDER=flexprice
+          VITE_API_URL=http://pay-jd-245-291017.tailaa2a30.ts.net:8080/v1
+          DOTENV
 
           # The hash is only a cache-busting key for the secret-consuming build
           # step: the dotenv content itself never enters the image history.
