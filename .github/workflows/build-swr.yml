@@ -1,0 +1,157 @@
+name: Build and push to Huawei SWR
+
+# Builds the production image (root Dockerfile, `production` target: nginx
+# serving the compiled SPA) and publishes it to Huawei SWR.
+#
+# Required repository configuration (Settings > Secrets and variables > Actions):
+#   - Variable FRONTEND_BUILD_ENV: the complete contents of the frontend
+#     `.env.production` dotenv file, including a browser-reachable VITE_API_URL
+#     and VITE_APP_ENV=self-hosted for this deployment. Only public VITE_*
+#     values belong here: they are compiled into the browser bundle. NEVER put
+#     private keys or merchant secrets in it.
+#   - Secrets SWR_USERNAME / SWR_PASSWORD: credentials allowed to push to
+#     swr.cn-east-3.myhuaweicloud.com/digitprint/flexprice-front.
+#
+# Only pushes to main and manual dispatches from main publish. The workflow is
+# deliberately not triggered by pull requests, so SWR credentials are never
+# exposed to builds of untrusted branches.
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-swr-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    # Only main publishes. A manual dispatch from any other ref is skipped so
+    # the shared `latest` tag can never be overwritten by a non-main build.
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    env:
+      REGISTRY: swr.cn-east-3.myhuaweicloud.com
+      IMAGE: swr.cn-east-3.myhuaweicloud.com/digitprint/flexprice-front
+
+    steps:
+      - name: Prepare frontend configuration
+        id: config
+        shell: bash
+        env:
+          # Passed through the step environment, never interpolated into the
+          # script body: multiline dotenv content cannot become shell code.
+          FRONTEND_BUILD_ENV: ${{ vars.FRONTEND_BUILD_ENV }}
+        run: |
+          if [[ -z "${FRONTEND_BUILD_ENV//[[:space:]]/}" ]]; then
+            echo "::error::Repository variable FRONTEND_BUILD_ENV is not configured or is empty. Set it to the complete contents of the frontend .env.production (public VITE_* values only, with a browser-reachable VITE_API_URL)."
+            exit 1
+          fi
+
+          umask 077
+          env_file="$RUNNER_TEMP/frontend.env"
+          printf '%s' "$FRONTEND_BUILD_ENV" > "$env_file"
+
+          # The hash is only a cache-busting key for the secret-consuming build
+          # step: the dotenv content itself never enters the image history.
+          config_hash="$(sha256sum "$env_file" | cut -d ' ' -f1)"
+
+          {
+            echo "path=$env_file"
+            echo "hash=$config_hash"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Validate SWR credentials
+        shell: bash
+        env:
+          SWR_USERNAME: ${{ secrets.SWR_USERNAME }}
+          SWR_PASSWORD: ${{ secrets.SWR_PASSWORD }}
+        run: |
+          missing=()
+          if [[ -z "${SWR_USERNAME:-}" ]]; then
+            missing+=("SWR_USERNAME")
+          fi
+          if [[ -z "${SWR_PASSWORD:-}" ]]; then
+            missing+=("SWR_PASSWORD")
+          fi
+          if (( ${#missing[@]} > 0 )); then
+            echo "::error::Missing required repository secret(s): ${missing[*]}. Configure them under Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Do not persist the job token in the checkout.
+          persist-credentials: false
+
+      - name: Define image references
+        id: image
+        shell: bash
+        run: |
+          version="sha-${GITHUB_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          {
+            echo "version-ref=${IMAGE}:${version}"
+            echo "latest-ref=${IMAGE}:latest"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Huawei SWR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.SWR_USERNAME }}
+          password: ${{ secrets.SWR_PASSWORD }}
+
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          # The production target is nginx serving the compiled static bundle.
+          target: production
+          platforms: linux/amd64
+          push: true
+          # SWR cannot parse an image index containing BuildKit provenance or
+          # SBOM attestations.
+          provenance: false
+          sbom: false
+          tags: |
+            ${{ steps.image.outputs.version-ref }}
+            ${{ steps.image.outputs.latest-ref }}
+          build-args: |
+            FRONTEND_CONFIG_HASH=${{ steps.config.outputs.hash }}
+          secret-files: |
+            frontend_env=${{ steps.config.outputs.path }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Report published images
+        env:
+          VERSION_REF: ${{ steps.image.outputs.version-ref }}
+          LATEST_REF: ${{ steps.image.outputs.latest-ref }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        shell: bash
+        run: |
+          if [[ -z "$DIGEST" ]]; then
+            echo "::error::The build completed without reporting an image digest."
+            exit 1
+          fi
+          {
+            printf '### Published images\n\n'
+            printf '| Purpose | Image reference |\n'
+            printf '| --- | --- |\n'
+            printf '| Deploy (latest, main) | `%s` |\n' "$LATEST_REF"
+            printf '| Rollback (pinned version) | `%s` |\n' "$VERSION_REF"
+            printf '\nDigest: `%s`\n' "$DIGEST"
+          } >> "$GITHUB_STEP_SUMMARY"

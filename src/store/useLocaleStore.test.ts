@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { act } from '@testing-library/react';
+import { Locale } from '@/config/branding';
 
 beforeEach(() => {
 	vi.resetModules();
@@ -23,29 +24,47 @@ async function importStore() {
 }
 
 describe('useLocaleStore', () => {
-	it('initialises with config default locale', async () => {
-		const useLocaleStore = await importStore();
-		const state = useLocaleStore.getState();
-		expect(state.locale).toBe('en');
-		expect(state.direction).toBe('ltr');
-	});
-
 	it('setLocale updates locale and direction', async () => {
 		const useLocaleStore = await importStore();
-		act(() => useLocaleStore.getState().setLocale('ar' as never));
+		act(() => useLocaleStore.getState().setLocale(Locale.Ar));
 		const state = useLocaleStore.getState();
-		expect(state.locale).toBe('ar');
+		expect(state.locale).toBe(Locale.Ar);
 		expect(state.direction).toBe('rtl');
 	});
 
 	it('setLocale updates document direction', async () => {
 		const useLocaleStore = await importStore();
-		act(() => useLocaleStore.getState().setLocale('ar' as never));
+		act(() => useLocaleStore.getState().setLocale(Locale.Ar));
 		expect(document.documentElement.dir).toBe('rtl');
 	});
 
-	it('allowedLocales comes from config', async () => {
+	it('switches from rtl Arabic to ltr Simplified Chinese', async () => {
 		const useLocaleStore = await importStore();
-		expect(useLocaleStore.getState().allowedLocales).toEqual(['en', 'ar']);
+		act(() => useLocaleStore.getState().setLocale(Locale.Ar));
+		expect(useLocaleStore.getState().direction).toBe('rtl');
+		expect(document.documentElement.lang).toBe(Locale.Ar);
+		expect(document.documentElement.dir).toBe('rtl');
+
+		act(() => useLocaleStore.getState().setLocale(Locale.ZhCn));
+		const state = useLocaleStore.getState();
+		expect(state.locale).toBe(Locale.ZhCn);
+		expect(state.direction).toBe('ltr');
+		expect(document.documentElement.lang).toBe(Locale.ZhCn);
+		expect(document.documentElement.dir).toBe('ltr');
+	});
+
+	it('persists a Simplified Chinese selection', async () => {
+		const useLocaleStore = await importStore();
+		act(() => useLocaleStore.getState().setLocale(Locale.ZhCn));
+		const persisted = JSON.parse(localStorage.getItem('flexprice_locale') ?? '{}');
+		expect(persisted.state.locale).toBe(Locale.ZhCn);
+	});
+
+	it('restores a persisted Simplified Chinese selection', async () => {
+		localStorage.setItem('flexprice_locale', JSON.stringify({ state: { locale: Locale.ZhCn }, version: 0 }));
+		const useLocaleStore = await importStore();
+		const state = useLocaleStore.getState();
+		expect(state.locale).toBe(Locale.ZhCn);
+		expect(state.direction).toBe('ltr');
 	});
 });

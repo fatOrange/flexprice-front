@@ -25,6 +25,12 @@ export enum CREDIT_NOTE_TYPE {
 	REFUND = 'REFUND',
 }
 
+/** Where a refund credit note sends the money. Omitted for adjustment credit notes. */
+export enum REFUND_TARGET {
+	BACK_TO_SOURCE = 'BACK_TO_SOURCE',
+	PREPAID_WALLET = 'PREPAID_WALLET',
+}
+
 // Interfaces
 export interface CreditNoteLineItem {
 	id: string;

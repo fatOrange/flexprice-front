@@ -1,4 +1,13 @@
-import { Pagination, CreditNoteLineItem, CREDIT_NOTE_STATUS, CREDIT_NOTE_REASON, CREDIT_NOTE_TYPE, Metadata, CreditNote } from '@/models';
+import {
+	Pagination,
+	CreditNoteLineItem,
+	CREDIT_NOTE_STATUS,
+	CREDIT_NOTE_REASON,
+	CREDIT_NOTE_TYPE,
+	REFUND_TARGET,
+	Metadata,
+	CreditNote,
+} from '@/models';
 import { TaxApplied } from '@/models/Tax';
 import { QueryFilter, TimeRangeFilter } from './base';
 
@@ -37,6 +46,8 @@ export interface CreateCreditNoteParams {
 	line_items: CreateCreditNoteLineItemRequest[];
 	idempotency_key?: string;
 	process_credit_note?: boolean;
+	/** Only meaningful for refund credit notes; omitted for adjustments. */
+	refund_target?: REFUND_TARGET;
 }
 
 export interface CreateCreditNoteLineItemRequest {
@@ -44,6 +55,24 @@ export interface CreateCreditNoteLineItemRequest {
 	display_name?: string;
 	amount: number;
 	metadata?: Metadata;
+}
+
+/** Editable row state for the credit note line-item amounts. */
+export interface CreditNoteLineItemForm {
+	id: string;
+	amount: number;
+	max_amount: number;
+	display_name: string;
+	quantity: string;
+	unit_price: number;
+}
+
+/** Display summary derived from the invoice payment status and the chosen amounts. */
+export interface CreditNoteFormPreview {
+	type: CREDIT_NOTE_TYPE;
+	totalAmount: number;
+	effectDescription: string;
+	settlementDescription: string;
 }
 
 export interface ProcessDraftCreditNoteParams {
@@ -63,4 +92,4 @@ export interface ListCreditNotesResponse {
 
 // Export model types for convenience
 export type { CreditNote, CreditNoteLineItem };
-export { CREDIT_NOTE_STATUS as CreditNoteStatus, CREDIT_NOTE_REASON as CreditNoteReason, CREDIT_NOTE_TYPE };
+export { CREDIT_NOTE_STATUS as CreditNoteStatus, CREDIT_NOTE_REASON as CreditNoteReason, CREDIT_NOTE_TYPE, REFUND_TARGET };

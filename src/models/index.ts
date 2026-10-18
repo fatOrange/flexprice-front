@@ -40,7 +40,7 @@ export { APPLICATION_STATUS, CREDIT_GRANT_APPLICATION_REASON } from './CreditGra
 
 // CreditNote
 export type { CreditNote, CreditNoteLineItem } from './CreditNote';
-export { CREDIT_NOTE_STATUS, CREDIT_NOTE_REASON, CREDIT_NOTE_TYPE } from './CreditNote';
+export { CREDIT_NOTE_STATUS, CREDIT_NOTE_REASON, CREDIT_NOTE_TYPE, REFUND_TARGET } from './CreditNote';
 
 // Customer
 export type { default as Customer } from './Customer';

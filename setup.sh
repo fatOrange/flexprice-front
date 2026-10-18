@@ -163,30 +163,26 @@ check_requirements() {
 # Function to validate environment configuration
 validate_env_config() {
     local env_file=".env"
-    local required_vars=("VITE_API_URL" "VITE_ENVIRONMENT")
-    local missing_vars=()
 
-    if [ -f "$env_file" ]; then
-        for var in "${required_vars[@]}"; do
-            if ! grep -q "^${var}=" "$env_file"; then
-                missing_vars+=("$var")
-            fi
-        done
-    else
+    if [ ! -f "$env_file" ]; then
         log_error "Environment file (.env) not found"
         return 1
     fi
 
-    if [ ${#missing_vars[@]} -ne 0 ]; then
-        log_error "Missing required environment variables in .env:"
-        for var in "${missing_vars[@]}"; do
-            log_error "  - $var"
-        done
+    if ! grep -q "^VITE_API_URL=." "$env_file"; then
+        log_error "Missing or empty VITE_API_URL in .env"
+        return 1
+    fi
+
+    # VITE_APP_ENV is the current name; the legacy names still work.
+    if ! grep -Eq "^VITE_(APP_ENV|APP_ENVIRONMENT|ENVIRONMENT)=" "$env_file"; then
+        log_error "Missing app environment in .env"
+        log_error "Set VITE_APP_ENV (or legacy VITE_ENVIRONMENT)"
         return 1
     fi
 
     # Validate API URL format
-    local api_url=$(grep "^VITE_API_URL=" "$env_file" | cut -d '=' -f2)
+    local api_url=$(grep "^VITE_API_URL=" "$env_file" | cut -d '=' -f2-)
     if ! [[ "$api_url" =~ ^https?:// ]]; then
         log_error "Invalid API URL format in .env: $api_url"
         log_error "API URL should start with http:// or https://"
@@ -213,8 +209,9 @@ VITE_ENVIRONMENT=self-hosted
 EOL
         log_success "Created .env file"
     else
-        # Check if VITE_ENVIRONMENT is set in existing .env
-        if ! grep -q "VITE_ENVIRONMENT=" .env; then
+        # Keep an existing .env untouched; only fill in the app environment when
+        # none of the current or legacy names is present.
+        if ! grep -Eq "^VITE_(APP_ENV|APP_ENVIRONMENT|ENVIRONMENT)=" .env; then
             log_warning "Adding VITE_ENVIRONMENT=self-hosted to existing .env file"
             echo "VITE_ENVIRONMENT=self-hosted" >> .env
         fi
@@ -223,6 +220,22 @@ EOL
 
     # Validate environment configuration
     if ! validate_env_config; then
+        return 1
+    fi
+}
+
+# Compute the SHA-256 of the env file used as the Docker config cache key
+compute_env_hash() {
+    local env_file="${1:-.env}"
+
+    if command -v sha256sum &> /dev/null; then
+        sha256sum "$env_file" | awk '{print $1}'
+    elif command -v shasum &> /dev/null; then
+        shasum -a 256 "$env_file" | awk '{print $1}'
+    elif command -v openssl &> /dev/null; then
+        openssl dgst -sha256 "$env_file" | awk '{print $NF}'
+    else
+        log_error "No SHA-256 tool found (need sha256sum, shasum, or openssl)"
         return 1
     fi
 }
@@ -251,6 +264,10 @@ start_services() {
         return 1
     fi
     
+    # Pass the env hash as a build arg for parity with direct docker builds.
+    FRONTEND_CONFIG_HASH=$(compute_env_hash .env) || return 1
+    export FRONTEND_CONFIG_HASH
+
     # Build services with detailed output
     echo "📦 Building Docker image..."
     if ! docker-compose build --no-cache --progress=plain app; then

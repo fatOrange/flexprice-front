@@ -158,6 +158,14 @@ export const integrationCatalogSpecs: IntegrationCatalogSpec[] = [
 		sectionKeys: ['overview', 'invoiceSync'],
 	},
 	{
+		id: 'wechatpay',
+		logo: '/assets/logo/wechatpay.png',
+		websiteUrl: 'https://pay.weixin.qq.com',
+		tagKeys: ['payments', 'invoices'],
+		type: 'available',
+		sectionKeys: ['overview', 'nativeQrPayments', 'jsapiPayments', 'webhooks'],
+	},
+	{
 		id: 'aws_marketplace',
 		logo: '/assets/logo/Marketplace-AWS.png',
 		docsUrl: 'https://docs.flexprice.io/integrations/marketplace-integration/aws/connection-setup',

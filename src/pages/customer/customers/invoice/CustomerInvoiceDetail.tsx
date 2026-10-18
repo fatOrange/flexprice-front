@@ -1,4 +1,4 @@
-import { FormHeader, Spacer, Button, Divider, Loader, Card, CardHeader } from '@/components/atoms';
+import { FormHeader, Spacer, Button, Divider, Loader, Card, CardHeader, Tooltip } from '@/components/atoms';
 import {
 	InvoiceTableMenu,
 	InvoicePaymentStatusModal,
@@ -14,7 +14,7 @@ import InvoiceApi from '@/api/InvoiceApi';
 import CustomerApi from '@/api/CustomerApi';
 import formatDate from '@/utils/common/format_date';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Download } from 'lucide-react';
+import { Download, RotateCcw } from 'lucide-react';
 import { FC, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { RouteNames } from '@/core/routes/Routes';
@@ -24,6 +24,10 @@ import { INVOICE_STATUS, INVOICE_TYPE } from '@/models/Invoice';
 import { getTypographyClass } from '@/lib/typography';
 import RedirectCell from '@/components/molecules/Table/RedirectCell';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
+import { useCurrentUserPermissions } from '@/hooks/useCurrentUserPermissions';
+import { canRefundInvoice } from '@/utils/invoices/refund';
+import { PAYMENT_STATUS } from '@/constants';
 
 interface Props {
 	invoice_id: string;
@@ -33,6 +37,8 @@ interface Props {
 const CustomerInvoiceDetail: FC<Props> = ({ invoice_id, breadcrumb_index }) => {
 	const { t } = useTranslation(['billing', 'common']);
 	const na = t('common:labels.na');
+	const navigate = useNavigate();
+	const { can } = useCurrentUserPermissions();
 	// const { invoice_id } = useParams<{ invoice_id: string }>();
 	const [state, setState] = useState({
 		isPaymentModalOpen: false,
@@ -133,7 +139,28 @@ const CustomerInvoiceDetail: FC<Props> = ({ invoice_id, breadcrumb_index }) => {
 
 	if (!data) return null;
 
+	const canCreateCreditNote = can('creditnote', 'write');
+	const canRefund = canRefundInvoice(data);
+	// OVERPAID is not a refundable state on the backend, so the action is not offered at all.
+	const isRefundSupported = data.payment_status !== PAYMENT_STATUS.OVERPAID;
+	const refundDisabledReason = !canCreateCreditNote ? t('refunds.writeDenied') : !canRefund ? t('refunds.unavailable') : undefined;
+
 	const invoiceType = data?.invoice_type as INVOICE_TYPE;
+
+	const refundButton = (
+		<Button
+			data-html2canvas-ignore='true'
+			variant='outline'
+			disabled={!canCreateCreditNote || !canRefund}
+			onClick={() => {
+				// Re-check in the handler: disabled styling is not an authorization boundary.
+				if (!canCreateCreditNote || !canRefund) return;
+				navigate(`${RouteNames.customers}/${data.customer_id}/invoice/${data.id}/credit-note?refund_target=BACK_TO_SOURCE`);
+			}}>
+			<RotateCcw />
+			<span>{t('refunds.action')}</span>
+		</Button>
+	);
 
 	return (
 		<div className='space-y-6'>
@@ -182,6 +209,16 @@ const CustomerInvoiceDetail: FC<Props> = ({ invoice_id, breadcrumb_index }) => {
 									<Download />
 									<span>{t('common:actions.download')}</span>
 								</Button>
+								{isRefundSupported &&
+									(refundDisabledReason ? (
+										<Tooltip content={refundDisabledReason}>
+											<span tabIndex={0} className='inline-block'>
+												{refundButton}
+											</span>
+										</Tooltip>
+									) : (
+										refundButton
+									))}
 								<InvoiceTableMenu data={data} />
 							</div>
 						</div>

@@ -1,0 +1,1154 @@
+{
+	"shared": {
+		"description": "描述",
+		"lookupKey": "查找键",
+		"lookupKeyDescription": "用于 API 调用和集成的系统标识符。",
+		"enterDescription": "输入描述",
+		"metadataOptional": "元数据（可选）",
+		"metadataPlaceholder": "输入以字符串为键和值的 JSON 元数据",
+		"metadataJsonStringsOnly": "以 JSON 表示的附加元数据。所有值都必须是字符串。",
+		"metadataJsonAdditional": "以 JSON 表示的附加元数据",
+		"metadataMustBeObject": "元数据必须是 JSON 对象",
+		"metadataAllValuesStrings": "所有元数据值都必须是字符串",
+		"metadataInvalidFormat": "元数据格式无效"
+	},
+	"costAnalytics": {
+		"table": {
+			"costAttribute": "成本属性",
+			"totalQuantity": "总数量",
+			"totalCost": "总成本"
+		}
+	},
+	"addons": {
+		"writeDeniedTooltip": "您没有管理附加项的权限。请联系租户管理员获取访问权限。",
+		"drawer": {
+			"editTitle": "编辑附加项",
+			"createTitle": "创建附加项",
+			"descriptionEdit": "输入附加项详情以更新附加项。",
+			"descriptionCreate": "输入附加项详情以创建新附加项。",
+			"namePlaceholder": "输入附加项名称",
+			"nameHelp": "此附加项的描述性名称。",
+			"addonName": "附加项名称",
+			"lookupPlaceholder": "输入附加项的短标识",
+			"purposeDescription": "帮助您的团队了解此附加项的用途。",
+			"validation": {
+				"nameRequired": "名称为必填项",
+				"lookupKeyRequired": "查找键为必填项"
+			},
+			"toast": {
+				"updated": "附加项更新成功",
+				"created": "附加项创建成功",
+				"failedUpdate": "更新附加项失败。请重试。",
+				"failedCreate": "创建附加项失败。请重试。"
+			}
+		},
+		"table": {
+			"status": "状态",
+			"updatedAt": "更新时间",
+			"statusActive": "启用",
+			"statusInactive": "停用"
+		},
+		"details": {
+			"title": "附加项详情",
+			"charges": "费用",
+			"chargesWriteDeniedTooltip": "您没有修改附加项费用的权限。请联系租户管理员获取访问权限。",
+			"entitlements": "权益",
+			"creditGrants": "额度授予",
+			"metadata": "元数据"
+		},
+		"subscriptionSheet": {
+			"editTitle": "编辑附加项",
+			"addTitle": "添加附加项",
+			"descriptionEdit": "编辑附加项配置",
+			"descriptionAdd": "为订阅添加附加项",
+			"addonRequired": "附加项*",
+			"selectAddon": "选择附加项",
+			"startDate": "开始日期",
+			"selectStartDate": "选择开始日期",
+			"updateAddAddon": "{{action}}附加项",
+			"update": "更新",
+			"add": "添加",
+			"addonRequiredError": "附加项为必填项",
+			"noDescription": "无描述"
+		},
+		"listPage": {
+			"title": "附加项",
+			"sortLabels": {
+				"name": "名称",
+				"createdAt": "创建时间",
+				"updatedAt": "更新时间"
+			},
+			"filterLabels": {
+				"name": "名称",
+				"lookupKey": "查找键",
+				"createdAt": "创建时间",
+				"status": "状态"
+			},
+			"filterStatus": {
+				"active": "启用",
+				"inactive": "停用"
+			},
+			"columns": {
+				"addonName": "附加项名称",
+				"lookupKey": "查找键",
+				"status": "状态",
+				"updatedAt": "更新时间"
+			},
+			"paginationUnit": "附加项",
+			"emptyState": {
+				"heading": "附加项",
+				"description": "创建您的第一个附加项，以定义客户可以购买的附加服务。",
+				"createButton": "创建附加项"
+			}
+		}
+	},
+	"costSheets": {
+		"writeDeniedTooltip": "您没有管理成本表的权限。请联系租户管理员获取访问权限。",
+		"listPage": {
+			"title": "成本表",
+			"paginationUnit": "成本表",
+			"sortLabels": {
+				"name": "名称",
+				"createdAt": "创建时间",
+				"updatedAt": "更新时间"
+			},
+			"filterLabels": {
+				"name": "名称",
+				"lookupKey": "查找键",
+				"createdAt": "创建时间",
+				"status": "状态"
+			},
+			"filterStatus": {
+				"active": "启用",
+				"inactive": "停用"
+			},
+			"emptyState": {
+				"heading": "成本表",
+				"description": "创建您的第一个成本表，以定义定价结构和费用。",
+				"createButton": "创建成本表"
+			}
+		},
+		"drawer": {
+			"editTitle": "编辑成本表",
+			"createTitle": "创建成本表",
+			"descriptionEdit": "输入成本表详情以更新成本表。",
+			"descriptionCreate": "输入成本表详情以创建新成本表。",
+			"namePlaceholder": "输入成本表名称",
+			"nameHelp": "此成本表的描述性名称。",
+			"costSheetName": "成本表名称",
+			"lookupPlaceholder": "输入成本表的短标识",
+			"purposeDescription": "帮助您的团队了解此成本表的用途。"
+		},
+		"details": {
+			"title": "成本表详情",
+			"charges": "费用",
+			"chargesWriteDeniedTooltip": "您没有修改成本表费用的权限。请联系租户管理员获取访问权限。",
+			"chargeCount": "{{count}} 项费用",
+			"searchCharges": "搜索费用...",
+			"noDescription": "无描述",
+			"noChargesSubtitle": "尚未向成本表添加费用",
+			"columns": {
+				"feature": "功能",
+				"chargeType": "费用类型",
+				"billingTiming": "计费时点",
+				"billingPeriod": "计费周期",
+				"value": "值"
+			},
+			"fields": {
+				"costSheetName": "成本表名称",
+				"lookupKey": "查找键",
+				"status": "状态",
+				"description": "描述"
+			},
+			"metadata": "元数据"
+		},
+		"toast": {
+			"updated": "成本表更新成功",
+			"created": "成本表创建成功",
+			"failedUpdate": "更新成本表失败。请重试。",
+			"failedCreate": "创建成本表失败。请重试。"
+		},
+		"validation": {
+			"nameRequired": "名称为必填项",
+			"lookupKeyRequired": "查找键为必填项"
+		},
+		"table": {
+			"costSheetName": "成本表名称",
+			"lookupKey": "查找键",
+			"status": "状态",
+			"updatedAt": "更新时间"
+		}
+	},
+	"coupons": {
+		"writeDeniedTooltip": "您没有管理优惠券的权限。请联系租户管理员获取访问权限。",
+		"listPage": {
+			"title": "优惠券",
+			"paginationUnit": "优惠券",
+			"sortLabels": {
+				"name": "名称",
+				"createdAt": "创建时间",
+				"updatedAt": "更新时间"
+			},
+			"filterLabels": {
+				"name": "名称",
+				"createdAt": "创建时间",
+				"status": "状态",
+				"type": "类型"
+			},
+			"filterStatus": {
+				"active": "启用",
+				"inactive": "停用"
+			},
+			"emptyState": {
+				"heading": "优惠券",
+				"description": "创建您的第一个优惠券，为客户提供折扣。",
+				"createButton": "创建优惠券"
+			}
+		},
+		"drawer": {
+			"editTitle": "编辑优惠券",
+			"createTitle": "创建优惠券",
+			"descriptionEdit": "输入优惠券详情以更新优惠券。",
+			"descriptionCreate": "输入优惠券详情以创建新优惠券。",
+			"namePlaceholder": "输入优惠券名称",
+			"nameHelp": "此优惠券的描述性名称。",
+			"couponName": "优惠券名称",
+			"couponType": "优惠券类型",
+			"selectCouponType": "选择优惠券类型",
+			"couponTypeHelp": "选择固定金额或百分比折扣",
+			"amountOff": "优惠金额",
+			"amountPlaceholder": "0.00",
+			"amountHelp": "要折扣的固定金额",
+			"currency": "币种",
+			"selectCurrency": "选择币种",
+			"percentageOff": "折扣百分比",
+			"percentagePlaceholder": "10",
+			"percentageHelp": "要折扣的百分比（0-100）",
+			"cadence": "使用频率",
+			"selectCadence": "选择使用频率",
+			"cadenceHelp": "此优惠券的使用频率",
+			"redeemAfter": "兑换开始时间（可选）",
+			"selectStartDate": "选择开始日期",
+			"redeemAfterHelp": "优惠券何时生效",
+			"redeemBefore": "兑换截止时间（可选）",
+			"selectExpiryDate": "选择过期日期",
+			"redeemBeforeHelp": "优惠券何时过期",
+			"maxRedemptions": "最多兑换次数（可选）",
+			"maxRedemptionsPlaceholder": "100",
+			"maxRedemptionsHelp": "此优惠券可使用的最大次数",
+			"durationInPeriods": "持续周期数",
+			"durationPlaceholder": "3",
+			"durationHelp": "折扣适用的计费周期数（重复频率时必填）",
+			"fixedAmount": "固定金额",
+			"percentage": "百分比",
+			"cadenceOnce": "一次",
+			"cadenceRepeated": "重复",
+			"cadenceForever": "永久",
+			"couponCode": "优惠券代码",
+			"couponCodePlaceholder": "例如 SUMMER20",
+			"couponCodeHelp": "用于通过 API 应用此优惠券的易读代码。创建后无法更改。",
+			"validation": {
+				"nameRequired": "名称为必填项",
+				"couponCodeRequired": "优惠券代码为必填项",
+				"typeRequired": "类型为必填项",
+				"cadenceRequired": "使用频率为必填项",
+				"amountOffFixedRequired": "固定类型优惠券必须填写优惠金额",
+				"percentageOffRequired": "百分比类型优惠券必须填写折扣百分比",
+				"currencyFixedRequired": "固定类型优惠券必须填写币种",
+				"durationRepeatedRequired": "重复频率必须填写持续周期数",
+				"redeemBeforeAfter": "兑换截止日期必须晚于兑换开始日期"
+			},
+			"toast": {
+				"updated": "优惠券更新成功",
+				"created": "优惠券创建成功",
+				"failedUpdate": "更新优惠券失败。请重试。",
+				"failedCreate": "创建优惠券失败。请重试。"
+			},
+			"invalidMetadata": "元数据无效"
+		},
+		"table": {
+			"name": "名称",
+			"type": "类型",
+			"discount": "折扣",
+			"redemptions": "兑换次数",
+			"status": "状态",
+			"updatedAt": "更新时间",
+			"entityName": "优惠券",
+			"statusActive": "启用",
+			"statusInactive": "停用"
+		},
+		"modal": {
+			"title": "关联优惠券",
+			"selectCoupon": "选择优惠券",
+			"chooseACoupon": "选择要关联的优惠券",
+			"selectCouponRequired": "请选择优惠券"
+		},
+		"details": {
+			"loadError": "加载优惠券详情失败",
+			"detailsTitle": "详情"
+		}
+	},
+	"groups": {
+		"writeDeniedTooltip": "您没有管理分组的权限。请联系租户管理员获取访问权限。",
+		"listPage": {
+			"title": "分组",
+			"sortLabels": {
+				"name": "名称",
+				"createdAt": "创建时间",
+				"updatedAt": "更新时间"
+			},
+			"filterLabels": {
+				"name": "名称",
+				"lookupKey": "查找键",
+				"createdAt": "创建时间",
+				"entityType": "实体类型"
+			},
+			"paginationUnit": "分组",
+			"emptyState": {
+				"heading": "分组",
+				"description": "创建分组以组织您的计价实体。",
+				"createButton": "创建分组"
+			}
+		},
+		"drawer": {
+			"editTitle": "编辑分组",
+			"createTitle": "创建分组",
+			"descriptionEdit": "输入分组详情以更新分组。",
+			"descriptionCreate": "输入分组详情以创建新分组。",
+			"namePlaceholder": "输入分组名称",
+			"nameHelp": "此分组的描述性名称。",
+			"groupName": "分组名称",
+			"lookupPlaceholder": "输入分组的短标识",
+			"entityType": "实体类型",
+			"selectEntityType": "选择实体类型",
+			"entityTypeHelp": "选择此分组将包含的实体类型。",
+			"createGroup": "创建分组",
+			"entityPrice": "价格",
+			"entityFeature": "功能"
+		},
+		"profile": {
+			"notFound": "未找到分组。",
+			"notFoundPageTitle": "分组",
+			"tabOverview": "概览",
+			"tabInformation": "信息"
+		},
+		"information": {
+			"title": "分组详情",
+			"name": "名称",
+			"entityType": "实体类型",
+			"externalId": "外部 ID"
+		},
+		"overview": {
+			"urlHintAdd": "在 URL 后添加",
+			"urlQueryPrice": "?entity_type=price",
+			"urlHintOr": "或",
+			"urlQueryFeature": "?entity_type=feature",
+			"urlHintSuffix": "即可查看该分组中的费用或功能。"
+		},
+		"toast": {
+			"updated": "分组更新成功",
+			"created": "分组创建成功",
+			"failedUpdate": "更新分组失败。请重试。",
+			"failedCreate": "创建分组失败。请重试。"
+		},
+		"validation": {
+			"nameRequired": "名称为必填项",
+			"lookupKeyRequired": "查找键为必填项"
+		},
+		"table": {
+			"name": "名称",
+			"lookupKey": "查找键",
+			"entityType": "实体类型",
+			"type": "类型",
+			"status": "状态",
+			"updatedAt": "更新时间",
+			"entityName": "分组"
+		}
+	},
+	"plans": {
+		"drawer": {
+			"editTitle": "编辑套餐",
+			"createTitle": "创建套餐",
+			"descriptionEdit": "输入套餐详情以更新套餐。",
+			"descriptionCreate": "输入套餐详情以创建新套餐。",
+			"namePlaceholder": "输入套餐名称",
+			"nameHelp": "此定价套餐的描述性名称。",
+			"planName": "套餐名称",
+			"lookupPlaceholder": "输入套餐的短标识",
+			"purposeDescription": "帮助您的团队了解此套餐的用途。"
+		},
+		"duplicate": {
+			"title": "复制套餐",
+			"description": "输入复制套餐的详情。权益、额度授予和其他设置将被复制。",
+			"duplicate": "复制"
+		},
+		"archive": {
+			"title": "归档套餐",
+			"archiving": "归档中…",
+			"confirmDescription": "确定要归档“{{name}}”吗？此套餐将不再可用于新订阅。"
+		},
+		"listPage": {
+			"title": "套餐",
+			"sortLabels": {
+				"name": "名称",
+				"createdAt": "创建时间",
+				"updatedAt": "更新时间"
+			},
+			"filterLabels": {
+				"name": "名称",
+				"lookupKey": "查找键",
+				"status": "状态",
+				"createdAt": "创建时间"
+			},
+			"filterStatus": {
+				"active": "启用",
+				"inactive": "停用"
+			},
+			"columns": {
+				"name": "名称",
+				"status": "状态",
+				"updatedAt": "更新时间"
+			},
+			"entityName": "套餐",
+			"paginationUnit": "套餐",
+			"rowActions": {
+				"edit": "编辑",
+				"duplicate": "复制",
+				"archive": "归档"
+			},
+			"createWithAi": "使用 AI 创建",
+			"writeDeniedTooltip": "您没有创建套餐的权限。请联系租户管理员获取访问权限。",
+			"aiPricingWriteDeniedTooltip": "AI 定价设置会同时创建套餐和功能，因此需要对两者都具有写入权限。请联系租户管理员获取访问权限。",
+			"emptyStateCustom": {
+				"heading": "套餐",
+				"description": "创建套餐以展示定价并开始向客户计费。"
+			},
+			"toast": {
+				"archiveSuccess": "套餐归档成功",
+				"archiveErrorFallback": "套餐归档失败"
+			}
+		},
+		"tabs": {
+			"creditGrants": "额度授予",
+			"entitlements": "权益"
+		},
+		"entitlementsTab": {
+			"configSheet": {
+				"keysCount": "{{count}} 个键",
+				"title": "配置值"
+			},
+			"writeDeniedTooltip": "您没有修改权益的权限",
+			"emptyStateSubtitle": "尚未向套餐添加权益"
+		},
+		"creditGrantsTab": {
+			"writeDeniedTooltip": "您没有修改额度授予的权限"
+		},
+		"detailsPage": {
+			"writeDeniedTooltip": "您没有修改此套餐的权限。请联系租户管理员获取访问权限。",
+			"syncWriteDeniedTooltip": "您没有同步此套餐价格的权限。请联系租户管理员获取访问权限。",
+			"unsyncedCountTooltip_one": "{{count}} 个订阅与此套餐的价格不同步。",
+			"unsyncedCountTooltip_other": "{{count}} 个订阅与此套餐的价格不同步。"
+		},
+		"information": {
+			"loading": "正在加载套餐详情...",
+			"planDetails": "套餐详情",
+			"metadata": "元数据",
+			"writeDeniedTooltip": "您没有编辑此套餐的权限"
+		},
+		"pricing": {
+			"noWidget": "不存在计价组件",
+			"widgetsPageTitle": "计价组件",
+			"selectBillingPeriod": "选择计费周期",
+			"selectCurrency": "选择币种",
+			"fetchError": "获取套餐时出错"
+		},
+		"organisms": {
+			"chargeLabels": {
+				"fixedCharge": "固定费用",
+				"usageBasedCharge": "按用量计费"
+			},
+			"setupCharges": {
+				"subtitle": "设置客户的此套餐收费方式。",
+				"planCharges": "套餐费用",
+				"choosePricingModel": "选择计价模式",
+				"fixedChargesTitle": "固定费用",
+				"usageBasedChargesTitle": "按用量计费",
+				"addFixedCharge": "添加固定费用",
+				"addUsageBasedCharges": "添加按用量计费",
+				"subscriptionTypeFixed": "固定费用",
+				"subscriptionTypeUsage": "按用量",
+				"fixedPricingDescription": "按固定时间表计费的固定价格。",
+				"usagePricingDescription": "根据实际用量计费。"
+			},
+			"recurringForm": {
+				"calculatorAria": "打开订阅时长计算器",
+				"perBilling": "每{{period}}",
+				"billingTiming": "计费时点",
+				"invoiceCadenceAdvance": "预先",
+				"invoiceCadenceArrear": "后付",
+				"invoiceCadenceAdvanceDesc": "在每个计费周期开始时收费。",
+				"invoiceCadenceArrearDesc": "在计费周期结束时收费。",
+				"minQuantity": "最低数量",
+				"trialToggleTitle": "从免费试用开始",
+				"trialToggleHint": "启用此选项可为订阅添加免费试用期。",
+				"trialPeriodTitle": "试用期",
+				"trialDaysPlaceholder": "试用天数"
+			},
+			"usageForm": {
+				"feature": "功能",
+				"selectMeteredFeature": "选择计量功能",
+				"billingModel": "计费模式",
+				"billingModelPlaceholder": "计费模式",
+				"selectBillingPeriod": "选择计费周期",
+				"per": "每",
+				"amountPlaceholder": "0.00",
+				"percentagePlaceholder": "0",
+				"bucketSize": "桶大小（可选）",
+				"bucketSizeNone": "不划分桶",
+				"bucketSizePlaceholder": "不划分桶",
+				"bucketSizeDescription": "在聚合前将用量按固定大小的桶划分，例如每小时总量"
+			},
+			"priceForm": {
+				"displayName": "显示名称",
+				"enterDisplayName": "输入显示名称",
+				"currency": "币种",
+				"billingPeriod": "计费周期",
+				"price": "价格",
+				"amountPlaceholderShort": "0",
+				"group": "分组",
+				"groupPlaceholder": "选择分组（可选）",
+				"groupDescription": "将此价格分配到分组以便更好地组织",
+				"startDateOptional": "开始日期（可选）",
+				"selectStartDate": "选择开始日期"
+			},
+			"volumeTier": {
+				"from": "起始",
+				"fromSuffix": "(>)",
+				"upTo": "上限",
+				"upToSuffix": "(<=)",
+				"flatFee": "固定费用",
+				"perUnitPrice": "单位价格",
+				"addTier": "添加阶梯",
+				"zeroPlaceholder": "0.00"
+			},
+			"planPriceTable": {
+				"start": "开始",
+				"end": "结束",
+				"noDateInformation": "无日期信息",
+				"fallbackName": "--",
+				"charges": "费用",
+				"writeDeniedTooltip": "您没有修改价格的权限。请联系租户管理员获取访问权限。",
+				"recurring": "周期性",
+				"advance": "预先",
+				"arrear": "后付",
+				"usageBased": "按用量",
+				"notAvailable": "--",
+				"chargeTypeTooltips": {
+					"fixedRecurring": "固定费用按周期性时间表计费",
+					"advance": "在每个计费周期开始时收费。",
+					"arrear": "在计费周期结束时收费。",
+					"usageBased": "根据实际用量或消耗计费"
+				},
+				"queryBuilder": {
+					"displayName": "显示名称",
+					"amount": "金额",
+					"billingPeriod": "计费周期"
+				}
+			}
+		}
+	},
+	"priceUnits": {
+		"writeDeniedTooltip": "您没有管理价格单位的权限。请联系租户管理员获取访问权限。",
+		"listPage": {
+			"title": "价格单位",
+			"paginationUnit": "价格单位",
+			"sortLabels": {
+				"name": "名称",
+				"code": "代码",
+				"createdAt": "创建时间",
+				"updatedAt": "更新时间"
+			},
+			"filterLabels": {
+				"name": "名称",
+				"code": "代码",
+				"baseCurrency": "基础币种",
+				"status": "状态",
+				"createdAt": "创建时间"
+			},
+			"filterStatus": {
+				"active": "启用",
+				"inactive": "停用"
+			},
+			"emptyState": {
+				"heading": "价格单位",
+				"description": "创建价格单位以定义用于计价的自定义币种或代币。",
+				"createButton": "创建价格单位"
+			}
+		},
+		"drawer": {
+			"editTitle": "编辑价格单位",
+			"createTitle": "创建价格单位",
+			"descriptionEdit": "输入价格单位详情以更新价格单位。",
+			"descriptionCreate": "输入价格单位详情以创建新价格单位。",
+			"namePlaceholder": "输入价格单位名称",
+			"nameHelp": "此价格单位的描述性名称（例如比特币、代币、额度）。",
+			"name": "名称",
+			"code": "代码",
+			"codePlaceholder": "输入价格单位的唯一代码",
+			"symbol": "符号",
+			"symbolPlaceholder": "输入符号（例如 ₿、€、tokens）",
+			"symbolHelp": "此价格单位的显示符号（例如比特币用 ₿、欧元用 €、代币用“tokens”）。",
+			"baseCurrency": "基础币种",
+			"selectBaseCurrency": "选择基础币种",
+			"baseCurrencyHelp": "基础币种代码（3 个字母，例如 USD、EUR、GBP）。",
+			"conversionRate": "换算率",
+			"conversionPlaceholder": "0.01",
+			"conversionHelp": "此价格单位到基础币种的汇率。必须大于 0。示例：0.01 表示 100 个单位 = 1.00 USD。"
+		},
+		"selector": {
+			"currency": "币种",
+			"selectCurrency": "选择币种",
+			"custom": "自定义",
+			"standard": "标准",
+			"errorLoading": "加载选项时出错",
+			"noOptions": "无可用选项"
+		},
+		"toast": {
+			"updated": "价格单位更新成功",
+			"created": "价格单位创建成功",
+			"failedUpdate": "更新价格单位失败。请重试。",
+			"failedCreate": "创建价格单位失败。请重试。"
+		},
+		"validation": {
+			"nameRequired": "名称为必填项",
+			"codeRequired": "代码为必填项",
+			"codeLength": "代码必须正好为 3 个字符",
+			"symbolRequired": "符号为必填项",
+			"baseCurrencyRequired": "基础币种为必填项",
+			"baseCurrencyLength": "基础币种必须正好为 3 个字符",
+			"conversionRateRequired": "换算率为必填项",
+			"conversionRateNumber": "换算率必须是有效数字",
+			"conversionRatePositive": "换算率必须大于 0"
+		},
+		"table": {
+			"name": "名称",
+			"code": "代码",
+			"symbol": "符号",
+			"baseCurrency": "基础币种",
+			"conversionRate": "换算率",
+			"status": "状态",
+			"updatedAt": "更新时间"
+		}
+	},
+	"prices": {
+		"updateDrawer": {
+			"title": "编辑价格详情",
+			"description": "更新非关键价格详情，例如显示名称、描述和元数据。",
+			"displayName": "显示名称",
+			"displayNamePlaceholder": "输入显示名称",
+			"lookupKey": "查找键",
+			"lookupKeyPlaceholder": "输入查找键",
+			"saveDetails": "保存详情",
+			"descriptionLabel": "描述",
+			"group": "分组",
+			"groupPlaceholder": "选择分组（可选）",
+			"toastSuccess": "价格详情更新成功",
+			"toastFailed": "更新价格详情失败。请重试。"
+		}
+	},
+	"features": {
+		"writeDeniedTooltip": "您没有管理功能的权限。请联系租户管理员获取访问权限。",
+		"alertSettingsWriteDeniedTooltip": "您没有管理此功能提醒设置的权限。请联系租户管理员获取访问权限。",
+		"listPage": {
+			"title": "功能",
+			"columns": {
+				"featureName": "功能名称",
+				"group": "分组",
+				"type": "类型",
+				"status": "状态",
+				"updatedAt": "更新时间"
+			},
+			"sortLabels": {
+				"name": "名称",
+				"createdAt": "创建时间",
+				"updatedAt": "更新时间"
+			},
+			"filterLabels": {
+				"name": "名称",
+				"createdAt": "创建时间",
+				"status": "状态",
+				"type": "类型",
+				"group": "分组"
+			},
+			"filterStatus": {
+				"active": "启用",
+				"inactive": "停用"
+			},
+			"filterTypes": {
+				"metered": "计量",
+				"boolean": "布尔",
+				"static": "静态",
+				"config": "配置"
+			},
+			"typeChips": {
+				"metered": "计量",
+				"boolean": "布尔",
+				"static": "静态",
+				"config": "配置",
+				"unknown": "未知"
+			},
+			"emptyCell": "—",
+			"paginationUnit": "功能",
+			"emptyState": {
+				"heading": "功能",
+				"description": "创建您的第一个功能，以定义客户付费的内容。",
+				"createButton": "创建功能"
+			}
+		},
+		"drawer": {
+			"editTitle": "编辑功能",
+			"description": "更新功能详情。",
+			"name": "名称",
+			"namePlaceholder": "输入功能名称",
+			"descriptionLabel": "描述",
+			"group": "分组",
+			"groupPlaceholder": "选择分组（可选）",
+			"unitSingular": "单位单数",
+			"unitPlural": "单位复数",
+			"unitSingularPh": "例如：unit",
+			"unitPluralPh": "例如：units",
+			"displayUnitSingular": "显示单位单数",
+			"displayUnitPlural": "显示单位复数",
+			"conversionFactor": "显示单位换算系数",
+			"conversionFactorPh": "例如：0.0000167",
+			"displayUnitPluralAutoSuffix": "s",
+			"saveFeature": "保存功能"
+		},
+		"alerts": {
+			"dialogTitle": "功能提醒设置",
+			"enableTitle": "启用提醒",
+			"enableLabel": "根据配置的阈值监控功能用量",
+			"enableDescription": "当此功能的用量达到配置的阈值时收到通知",
+			"criticalThreshold": "严重阈值",
+			"criticalHelp": "用量达到严重级别时提醒",
+			"warningThreshold": "警告阈值",
+			"warningHelp": "用量达到警告级别时提醒",
+			"infoThreshold": "提示阈值",
+			"infoHelp": "用量达到提示级别时提醒",
+			"remove": "移除",
+			"add": "添加",
+			"thresholdValue": "阈值",
+			"thresholdPlaceholder": "0.00",
+			"condition": "条件",
+			"below": "低于",
+			"above": "高于",
+			"saveChanges": "保存更改",
+			"saving": "保存中...",
+			"toastAtLeastOneThreshold": "请至少配置一个阈值级别",
+			"toastInvalidCriticalThreshold": "请输入有效的严重阈值",
+			"toastInvalidWarningThreshold": "请输入有效的警告阈值",
+			"toastInvalidInfoThreshold": "请输入有效的提示阈值"
+		},
+		"form": {
+			"name": "名称*",
+			"namePlaceholder": "输入功能名称",
+			"type": "类型*",
+			"lookupKey": "查找键",
+			"lookupKeyPlaceholder": "输入唯一查找键（可选）",
+			"unitName": "单位名称",
+			"unitNameLower": "单位名称",
+			"displayUnitName": "显示单位名称",
+			"displayUnitNameLower": "显示单位名称",
+			"featureDescription": "功能描述",
+			"featureDescriptionLower": "功能描述",
+			"addGroup": "添加分组",
+			"unitSingular": "单位单数",
+			"unitSingularPh": "毫秒",
+			"unitPlural": "单位复数",
+			"unitPluralPh": "毫秒",
+			"displayUnitSingular": "显示单位单数",
+			"displayUnitSingularPh": "分钟",
+			"displayUnitPlural": "显示单位复数",
+			"displayUnitPluralPh": "分钟",
+			"conversionFactor": "单位换算系数",
+			"conversionFactorPh": "（例如 60000）",
+			"conversionFormula": "单位值 = 显示值 * 换算系数",
+			"group": "分组",
+			"groupPlaceholder": "选择分组（可选）",
+			"featureDescriptionLabel": "功能描述",
+			"descriptionPlaceholder": "输入描述",
+			"eventName": "事件名称*",
+			"eventNamePlaceholder": "tokens_total",
+			"eventNameHelp": "用于筛选和统计用量的唯一事件标识符，例如 user_signup、api_calls 等。",
+			"eventFilters": "事件筛选条件",
+			"eventFiltersTitle": "事件筛选条件",
+			"eventFiltersSubtitle": "根据特定属性（例如地区、用户类型或自定义属性）筛选事件，以细化统计。",
+			"aggregationChoose": "选择值的聚合方式。",
+			"aggregationFunction": "聚合函数*",
+			"aggregationFunctionPh": "SUM",
+			"aggregationField": "聚合字段*",
+			"aggregationFieldPh": "tokens",
+			"aggregationFieldHelp": "指定事件数据中要聚合的属性，例如 tokens、messages_sent、storage_used。",
+			"customExpressionButton": "自定义表达式",
+			"aggregationFieldButton": "聚合字段",
+			"customExpression": "自定义表达式*",
+			"customExpressionPh": "ceil(duration_ms / 1000)",
+			"customExpressionHelp": "编写按事件求值的 CEL 公式来计算数量。变量是事件中的顶层属性名称（例如 duration_ms、tokens）。\n\n可用函数：max(a, b)、min(a, b)、abs(x)、ceil(x)、floor(x)、round(x)、pow(x, y)、sqrt(x)、log(x)。\n\n示例：\n• input_tokens + output_tokens\n• ceil(duration_ms / 1000)\n• min(usage, quota)\n• max(cores * hours * rate, 0.01)\n\n仅适用于 SUM、AVG、MAX 和 LATEST。",
+			"aggregationMultiplier": "聚合乘数*",
+			"aggregationMultiplierPh": "1",
+			"aggregationMultiplierHelp": "指定聚合的乘数，例如 1.5、0.25 或 1000。",
+			"groupByButton": "分组依据",
+			"groupBy": "分组依据",
+			"groupByPlaceholder": "例如 user_id、tenant_id",
+			"groupByHelp": "用于聚合分组的字段。必须是字符串（例如事件属性名称）。",
+			"eventExample": "事件示例",
+			"pageTitle": "创建功能",
+			"creating": "正在创建功能...",
+			"unitDefault": "unit",
+			"unitsDefault": "units"
+		},
+		"details": {
+			"charges": "费用",
+			"entitlements": "权益",
+			"eventDetails": "事件详情",
+			"eventName": "事件名称",
+			"eventFilters": "事件筛选条件",
+			"aggregationDetails": "聚合详情",
+			"type": "类型",
+			"value": "值",
+			"customExpression": "自定义表达式",
+			"unitName": "单位名称",
+			"displayUnitName": "显示单位名称",
+			"usageReset": "用量重置",
+			"bucketSize": "桶大小",
+			"groupBy": "分组依据"
+		}
+	},
+	"entityChargesPage": {
+		"addChargesPageTitle": "为 {{name}} 添加费用",
+		"entityTypeDisplay": {
+			"PLAN": "套餐",
+			"ADDON": "附加项",
+			"COSTSHEET": "成本表"
+		},
+		"selectChargeTypeTitle": "选择费用类型",
+		"addChargeOptionsGroupAria": "添加费用选项",
+		"addFixedCharge": "添加固定费用",
+		"addUsageBasedCharges": "添加按用量计费",
+		"cannotSaveChargesAria": "无法保存——请先完成所有费用表单",
+		"saveChargesAria": "保存{{entity}}费用",
+		"entityLabelsLower": {
+			"PLAN": "套餐",
+			"ADDON": "附加项",
+			"COST_SHEET": "成本表"
+		},
+		"subscriptionCalculator": {
+			"contractAmount": "合同金额",
+			"contractTerm": "合同期限",
+			"displayAmount": "显示金额：",
+			"invalidAmountHint": "输入有效的合同金额以查看计算结果。",
+			"confirmApply": "确定",
+			"perPlanPeriodSuffix": {
+				"DAILY": "（每天）",
+				"WEEKLY": "（每周）",
+				"MONTHLY": "（每月）",
+				"QUARTERLY": "（每季度）",
+				"HALF_YEARLY": "（每半年）",
+				"ANNUAL": "（每年）"
+			},
+			"periodLabels": {
+				"DAILY": "按日",
+				"WEEKLY": "按周",
+				"MONTHLY": "按月",
+				"QUARTERLY": "按季度",
+				"HALF_YEARLY": "半年",
+				"ANNUAL": "按年"
+			}
+		}
+	},
+	"chargeValue": {
+		"priceOverrideApplied": "已应用价格覆盖",
+		"tierDetectionPrefix": "阶梯 ",
+		"volume": "按量",
+		"slab": "分段",
+		"tierPricingTitle": "{{mode}}阶梯计价",
+		"overridden": "（已覆盖）",
+		"units": "单位",
+		"perUnit": "每单位",
+		"flatFee": "固定费用",
+		"noCouponApplied": "未应用优惠券",
+		"tierRangeWithUnits": "{{range}} 个单位",
+		"perUnitLine": "每单位 {{symbol}}{{amount}}",
+		"flatFeePlusLine": "+ {{symbol}}{{amount}} 固定费用",
+		"override": {
+			"billingModelLine": "计费模式：{{from}} → {{to}}",
+			"tierModeLine": "阶梯模式：{{from}} → {{to}}",
+			"amountLine": "金额：{{from}} → {{to}}",
+			"quantityLine": "数量：1 → {{to}}",
+			"packageSizeLine": "包大小：{{from}} 个单位 → {{to}} 个单位",
+			"tiersCountLine": "阶梯：{{from}} 个阶梯 → {{to}} 个阶梯",
+			"tierStructureModified": "阶梯结构已修改",
+			"priceConfigurationModified": "价格配置已修改",
+			"tierDetailFrom": "起始（>）：{{from}} → {{to}}",
+			"tierDetailUpTo": "上限（<=）：{{from}} → {{to}}",
+			"tierDetailPerUnit": "单位价格：{{from}} → {{to}}",
+			"tierDetailFlatFee": "固定费用：{{from}} → {{to}}",
+			"tierHeader": "阶梯 {{n}}",
+			"tierLine": "{{header}}：{{details}}",
+			"tierAdded": "已添加{{header}}：{{details}}",
+			"tierAddedDetails": "起始（>）：{{from}}，上限（<=）：{{upTo}}，单位价格：{{perUnit}}，固定费用：{{flatFee}}",
+			"detailSep": "，"
+		}
+	},
+	"jsonEditor": {
+		"title": "配置值（JSON）",
+		"showEditor": "显示编辑器",
+		"hideEditor": "隐藏编辑器",
+		"validJson": "有效的 JSON",
+		"errorInvalidJson": "无效的 JSON",
+		"errorMustBeObject": "必须是 JSON 对象",
+		"lines": "行"
+	},
+	"configKeyValueEditor": {
+		"title": "配置值",
+		"addRow": "添加",
+		"keyHeader": "键",
+		"valueHeader": "值",
+		"keyPlaceholder": "usage_limit",
+		"valuePlaceholder": "100",
+		"errorDuplicateKey": "重复的键：\"{{key}}\"",
+		"errorEmptyValue": "值为必填项",
+		"errorEmptyKey": "键为必填项",
+		"removeRow": "删除行"
+	},
+	"entitlements": {
+		"usageResetPeriod": {
+			"DAILY": "按日",
+			"WEEKLY": "按周",
+			"MONTHLY": "按月",
+			"QUARTERLY": "按季度",
+			"HALF_YEARLY": "半年",
+			"ANNUAL": "按年",
+			"NEVER": "从不"
+		},
+		"validation": {
+			"featureMeterRequired": "功能必须关联计量器",
+			"usageLimitNegative": "用量上限不能为负数",
+			"usageLimitRequired": "用量上限为必填项",
+			"usageResetRequired": "用量重置周期为必填项",
+			"staticValueRequired": "值为必填项",
+			"staticValueNegative": "值不能为负数",
+			"staticValueEmpty": "值不能为空",
+			"selectFeature": "请选择功能",
+			"invalidFeatureType": "功能类型无效",
+			"featureAlreadyAdded": "此功能已添加",
+			"addAtLeastOne": "请至少添加一个权益",
+			"allowanceRequired": "输入值",
+			"allowancePositive": "值必须大于零",
+			"durationRequired": "输入值的刷新频率"
+		},
+		"errors": {
+			"entityIdRequired": "实体 ID 为必填项"
+		},
+		"toast": {
+			"addedSuccess": "权益添加成功",
+			"addFailed": "添加权益失败。请重试。"
+		},
+		"addDrawer": {
+			"title": "添加权益",
+			"description": "定义客户将享有的功能。",
+			"featuresLabel": "功能",
+			"selectFeaturePlaceholder": "选择功能",
+			"valueLabel": "值",
+			"enterValuePlaceholder": "输入值",
+			"setInfiniteLabel": "设置为无限制",
+			"usageResetLabel": "用量重置",
+			"usageResetPlaceholder": "选择用量重置周期",
+			"usageResetDescription": "值将按指定间隔重置",
+			"softLimitLabel": "软限制",
+			"softLimitDescription": "如果启用，即使超出限制也始终允许访问。",
+			"cancel": "取消",
+			"add": "添加",
+			"addAnotherFeature": "添加另一个功能",
+			"save": "保存",
+			"unlimitedDisplay": "无限制",
+			"calculatorAriaLabel": "显示值计算器",
+			"unitsFallback": "单位",
+			"configValueRequired": "配置功能需要有效的 JSON 对象",
+			"durationHour": "小时",
+			"durationDay": "天",
+			"durationWeek": "周",
+			"windowStartsLabel": "窗口开始时间",
+			"stackingLabel": "叠加方式",
+			"stackingAdditive": "累加",
+			"stackingParallel": "并行",
+			"overageHint": "超出该值的用量将按套餐的用量价格计费",
+			"previewRecurringFoot": "在 30 天周期内开启 {{windows}} 个窗口——共计 {{total}}，每次 {{quota}}。",
+			"previewPeriodFoot": "整个计费周期内可使用 {{quota}}。",
+			"previewUnlimitedFoot": "无上限——用量会被跟踪，但永不收费。",
+			"grantUnavailable": "此功能不支持周期性额度",
+			"durationBillingPeriod": "计费周期",
+			"durationHour_one": "小时",
+			"durationHour_other": "小时",
+			"durationDay_one": "天",
+			"durationDay_other": "天",
+			"durationWeek_one": "周",
+			"durationWeek_other": "周",
+			"allowanceTypeLabel": "值类型",
+			"typeQuantity": "数量",
+			"typeAmount": "金额",
+			"allowanceValueLabel": "值",
+			"refreshPeriodLabel": "用量重置",
+			"noLimitLabel": "无限制",
+			"windowStartsCardFirstUsage": "首次使用时",
+			"windowStartsCardUnitStart": "日历边界",
+			"advancedLabel": "高级",
+			"cadenceHourly": "每小时",
+			"cadenceDaily": "每天",
+			"cadenceWeekly": "每周",
+			"cadenceBillingPeriod": "每个计费周期",
+			"infoAria": "详细了解{{field}}",
+			"typeInfo": "数量——按计量器单位计数。\n金额——按货币金额计数。",
+			"windowStartsInfo": "首次使用时——从客户的第一个事件开始。\n日历边界——在每个小时、天或周开始时开始。",
+			"stackingInfo": "累加——套餐和附加项共用一个额度池。\n并行——每个来源拥有独立窗口。",
+			"addedLabel": "已添加",
+			"removeAriaLabel": "移除 {{name}}",
+			"deferredCadence": "将在当前窗口结束时生效，时间为{{when}}。",
+			"deferredCut": "低于本窗口已使用的 {{used}}，因此将在当前窗口结束时生效，时间为{{when}}。"
+		},
+		"displayCalculator": {
+			"titleFallback": "显示值",
+			"noDisplayUnit": "此功能未配置显示单位。",
+			"title": "以显示单位设置值",
+			"description": "输入以 <strongDisplay>{{displayUnit}}</strongDisplay> 为单位的值，查看以 <strongBase>{{baseUnit}}</strongBase> 为单位的等效用量上限。",
+			"valueInDisplayUnitLabel": "显示单位值",
+			"enterValuePlaceholder": "输入值",
+			"calculatedUsageLimit": "计算得出的用量上限：",
+			"conversionFactor": "此功能的换算系数为 <rate>{{rate}}</rate>。",
+			"emDash": "—",
+			"confirm": "确定"
+		},
+		"editDrawer": {
+			"title": "编辑权益：{{name}}",
+			"unknownFeature": "未知",
+			"description": "覆盖此订阅的权益值",
+			"featureType": "功能类型",
+			"usageLimit": "用量上限",
+			"enterUsageLimitPlaceholder": "输入用量上限",
+			"originalPrefix": "原值：",
+			"resetsSuffix": "（{{period}}重置）",
+			"setInfiniteLabel": "设置为无限制",
+			"staticValue": "静态值",
+			"enterStaticPlaceholder": "输入静态值",
+			"notSet": "未设置",
+			"enabledLabel": "启用",
+			"enabled": "已启用",
+			"disabled": "已停用",
+			"originalBooleanPrefix": "原值：",
+			"cancel": "取消",
+			"resetToDefault": "重置为默认值",
+			"saveOverride": "保存覆盖",
+			"planAllowance": "套餐值：{{value}}",
+			"allowanceHelp": "覆盖后仅对此客户替换套餐值。"
+		},
+		"overridesTable": {
+			"columnFeatureName": "功能名称",
+			"columnEntityType": "实体类型",
+			"columnFeatureType": "功能类型",
+			"columnValue": "值",
+			"tooltipUsageLimit": "用量上限：{{from}} → {{to}}",
+			"tooltipStaticValue": "静态值：{{from}} → {{to}}",
+			"tooltipStatus": "状态：{{from}} → {{to}}",
+			"tooltipConfig": "此订阅的配置值已被覆盖",
+			"valuePlaceholder": "--",
+			"perPeriodSuffix": " / {{period}}",
+			"featureTypeMetered": "计量",
+			"featureTypeBoolean": "布尔",
+			"featureTypeStatic": "静态",
+			"overrideAppliedTitle": "已应用权益覆盖",
+			"edit": "编辑",
+			"noEntitlements": "无可用权益",
+			"unlimited": "无限制",
+			"enabled": "已启用",
+			"disabled": "已停用",
+			"unknownFeature": "未知功能",
+			"tooltipAllowance": "值：{{from}} → {{to}}",
+			"columnMeasure": "计量方式",
+			"measureAmountLabel": "金额",
+			"measureQuantityLabel": "数量"
+		},
+		"subscriptionEdit": {
+			"columnSource": "来源",
+			"sourcePlan": "套餐",
+			"sourceAddon": "附加项",
+			"sourceSubscription": "订阅",
+			"sourceOverride": "订阅覆盖",
+			"resetAction": "重置为默认值",
+			"resetConfirmTitle": "将“{{name}}”重置为套餐默认值？",
+			"resetConfirmDescription": "这将移除订阅覆盖。套餐权益将重新生效。",
+			"deleteConfirmTitle": "删除“{{name}}”的权益？",
+			"saveSuccess": "权益更新成功",
+			"saveFailed": "更新权益失败",
+			"deleteSuccess": "权益移除成功",
+			"deleteFailed": "移除权益失败",
+			"createRequiresParent": "没有父权益时无法创建覆盖",
+			"editBlockedMultipleSources": "此额度来自多个权益。请在套餐或附加项上更改。"
+		},
+		"allowance": {
+			"unlimited": "无限制",
+			"perPeriod": "{{amount}} / {{period}}",
+			"separateAllowances": "独立",
+			"backedByGrant": "授予",
+			"backedByLegacy": "旧版"
+		}
+	},
+	"premiumFeature": {
+		"tooltip": "高级功能",
+		"dialogTitle": "高级功能",
+		"dialogDescription": "这是高级功能。您需要升级到高级套餐才能使用此功能。",
+		"contactUs": "联系我们"
+	},
+	"priceDialogs": {
+		"billingModels": {
+			"flatFee": "固定费用",
+			"package": "打包计价",
+			"volumeTiered": "按量阶梯",
+			"slabTiered": "分段阶梯",
+			"percentageFee": "百分比费用"
+		},
+		"originalPrice": "原价",
+		"billingModel": "计费模式",
+		"bucketSize": "桶大小（可选）",
+		"bucketSizePlaceholder": "不划分桶",
+		"bucketSizeSetOnMeter": "已在计量器上设置（{{bucketSize}}）——价格无法在此基础上再定义自己的桶大小。",
+		"selectBillingModel": "选择计费模式",
+		"overrideAmountLabel": "覆盖金额（{{unit}}）",
+		"enterNewAmountOptional": "输入新金额（可选）",
+		"tiers": "阶梯",
+		"packageConfiguration": "打包配置",
+		"unitsPerPackage": "每包单位数",
+		"enterUnitsPerPackage": "输入每包单位数",
+		"originalUnitsPerPackage": "原值：每包 {{count}} 个单位",
+		"effectiveFromOptional": "生效时间（可选）",
+		"selectDateScheduledUpdate": "选择计划更新的日期",
+		"schedulePriceChangeHint": "将此价格变更安排在未来的某个日期生效",
+		"priceOverriddenNotice": "此价格已被覆盖。请检查上方的更改。",
+		"cancel": "取消",
+		"reset": "重置",
+		"modifyPricingDescription": "修改 {{name}} 的计价配置",
+		"updatePricingDescription": "更新 {{name}} 的计价配置（金额、计费模式、阶梯）",
+		"thisChargeFallback": "此费用",
+		"overrideTitle": "覆盖价格配置",
+		"updateTitle": "更新价格",
+		"overridePrice": "覆盖价格",
+		"updateOverride": "更新覆盖",
+		"updatePrice": "更新价格",
+		"failedUpdateToast": "价格更新失败",
+		"toastScheduled": "{{name}} 将于 {{date}} 生效。",
+		"scheduleNeedsChange": "请修改价格以安排更新",
+		"toastUpdated": "{{name}} 已成功更新。",
+		"fallbackPriceName": "价格",
+		"overridePercentageLabel": "覆盖百分比",
+		"enterNewPercentageOptional": "输入新的百分比（可选）"
+	}
+}

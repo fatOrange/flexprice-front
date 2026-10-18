@@ -7,12 +7,26 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies and build output
 node_modules
 dist
 dist-ssr
+coverage
+storybook-static
+playwright-report
+test-results
+blob-report
+*.tsbuildinfo
 *.local
 
-# Editor directories and files
+# Environment files are provided at build time through the frontend_env secret
+.env
+.env.*
+
+# VCS / editors / local tooling
+.git
+.gitignore
+.github
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -23,5 +37,3 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
-tsconfig.tsbuildinfo
-tsconfig.app.tsbuildinfo

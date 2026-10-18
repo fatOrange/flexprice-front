@@ -4,6 +4,7 @@ import i18n from 'i18next';
 const INTL_LOCALE_BY_LANG: Record<string, string> = {
 	en: 'en-US',
 	ar: 'ar',
+	'zh-cn': 'zh-CN',
 	he: 'he-IL',
 	fa: 'fa-IR',
 	ur: 'ur-PK',

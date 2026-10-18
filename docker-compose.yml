@@ -4,11 +4,24 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: production
+      # Secrets are not part of BuildKit's build cache key. Rebuilding on every
+      # compose build keeps a changed .env from silently reusing stale config.
+      no_cache: true
+      args:
+        FRONTEND_CONFIG_HASH: ${FRONTEND_CONFIG_HASH:-}
+      secrets:
+        - source: frontend_env
+          target: frontend_env
     ports:
-      - "3000:3000"
+      - "3000:80"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+
+secrets:
+  frontend_env:
+    file: .env

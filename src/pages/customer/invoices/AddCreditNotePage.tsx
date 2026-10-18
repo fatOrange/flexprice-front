@@ -1,14 +1,16 @@
-import { Button, Chip, Dialog, Input, Page, Select, SelectOption, Textarea } from '@/components/atoms';
+import { Button, CheckboxRadioGroup, Chip, Dialog, Input, Page, Select, SelectOption, Textarea } from '@/components/atoms';
 import { Skeleton } from '@/components/ui';
 import { useBreadcrumbsStore } from '@/store';
 import InvoiceApi from '@/api/InvoiceApi';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState, useMemo, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router';
-import { CreditNote } from '@/models';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router';
+import { CreditNote, REFUND_TARGET } from '@/models';
 import {
 	CreateCreditNoteLineItemRequest,
 	CreateCreditNoteParams,
+	CreditNoteFormPreview,
+	CreditNoteLineItemForm,
 	PreviewCreditNoteParams,
 	CREDIT_NOTE_REASON,
 	CREDIT_NOTE_TYPE,
@@ -17,66 +19,79 @@ import CreditNoteApi from '@/api/CreditNoteApi';
 import { PAYMENT_STATUS, formatCurrency, getCurrencySymbol, toSentenceCase } from '@/constants';
 import toast from 'react-hot-toast';
 import { RouteNames } from '@/core/routes/Routes';
+import { refetchInvoiceQueries } from '@/core/services/tanstack/queryKeys';
+import { refetchQueries } from '@/core/services/tanstack/ReactQueryProvider';
+import { canRefundInvoice, getRefundableAmount } from '@/utils/invoices/refund';
 import { AddChargesButton } from '@/components/organisms/PlanForm/SetupChargesSection';
 import { PremiumFeatureIcon } from '@/components/molecules/PremiumFeature/PremiumFeature';
 import { useTranslation } from 'react-i18next';
+import Decimal from 'decimal.js';
 
-interface LineItemForm {
-	id: string;
-	amount: number;
-	max_amount: number;
-	display_name: string;
-	quantity: string;
-	unit_price: number;
-}
-
-interface CreditNotePreview {
-	type: CREDIT_NOTE_TYPE;
-	totalAmount: number;
-	effectDescription: string;
-	settlementDescription: string;
-}
+const getCreditNoteType = (paymentStatus: string): CREDIT_NOTE_TYPE => {
+	switch (paymentStatus.toUpperCase()) {
+		case PAYMENT_STATUS.SUCCEEDED:
+		case PAYMENT_STATUS.PARTIALLY_REFUNDED:
+			return CREDIT_NOTE_TYPE.REFUND;
+		case PAYMENT_STATUS.FAILED:
+		case PAYMENT_STATUS.PENDING:
+		case PAYMENT_STATUS.PROCESSING:
+		case PAYMENT_STATUS.INITIATED:
+			return CREDIT_NOTE_TYPE.ADJUSTMENT;
+		default:
+			return CREDIT_NOTE_TYPE.ADJUSTMENT;
+	}
+};
 
 const AddCreditNotePage = () => {
 	const { t } = useTranslation(['billing', 'common']);
 	const { invoice_id } = useParams<{ invoice_id: string }>();
+	const [searchParams] = useSearchParams();
 	const { updateBreadcrumb, setSegmentLoading } = useBreadcrumbsStore();
 	const navigate = useNavigate();
-	const queryClient = useQueryClient();
 
-	const { data: invoice, isLoading } = useQuery({
+	// The refund entry point asks for BACK_TO_SOURCE explicitly. Every other entry keeps the
+	// backend's existing PREPAID_WALLET default.
+	const refundRequestedFromQuery = searchParams.get('refund_target') === REFUND_TARGET.BACK_TO_SOURCE;
+
+	const {
+		data: invoice,
+		isLoading,
+		isFetching: isInvoiceFetching,
+	} = useQuery({
 		queryKey: ['fetchInvoice', invoice_id],
 		queryFn: async () => await InvoiceApi.getInvoiceById(invoice_id!),
 		enabled: !!invoice_id,
+		// The detail page shares this key. A refund cap computed from its cached invoice could
+		// authorize money movement against an invoice that has since changed, so always re-read
+		// it before showing or submitting a refund.
+		refetchOnMount: 'always',
 	});
 
 	// Form state
 	const [selectedReason, setSelectedReason] = useState<CREDIT_NOTE_REASON | ''>('');
 	const [memo, setMemo] = useState('');
-	const [lineItems, setLineItems] = useState<LineItemForm[]>([]);
+	const [lineItems, setLineItems] = useState<CreditNoteLineItemForm[]>([]);
+	const [refundTarget, setRefundTarget] = useState<REFUND_TARGET>(() =>
+		refundRequestedFromQuery ? REFUND_TARGET.BACK_TO_SOURCE : REFUND_TARGET.PREPAID_WALLET,
+	);
 	const [showConfirmModal, setShowConfirmModal] = useState(false);
 	const [showMemo, setShowMemo] = useState(false);
 
-	// Business logic: Determine credit note type based on payment status
-	const getCreditNoteType = (paymentStatus: string): CREDIT_NOTE_TYPE => {
-		switch (paymentStatus.toUpperCase()) {
-			case PAYMENT_STATUS.SUCCEEDED:
-			case PAYMENT_STATUS.PARTIALLY_REFUNDED:
-				return CREDIT_NOTE_TYPE.REFUND;
-			case PAYMENT_STATUS.FAILED:
-			case PAYMENT_STATUS.PENDING:
-			case PAYMENT_STATUS.PROCESSING:
-			case PAYMENT_STATUS.INITIATED:
-				return CREDIT_NOTE_TYPE.ADJUSTMENT;
-			default:
-				return CREDIT_NOTE_TYPE.ADJUSTMENT;
-		}
-	};
+	const refundableAmount = useMemo(() => (invoice ? getRefundableAmount(invoice) : 0), [invoice]);
+	const refundIsEligible = useMemo(() => (invoice ? canRefundInvoice(invoice) : false), [invoice]);
+	const isRefundType = invoice ? getCreditNoteType(invoice.payment_status) === CREDIT_NOTE_TYPE.REFUND : false;
+	// The refund query is a user intent, not a derived form type. If the freshly fetched invoice
+	// is no longer refundable, keep the refund flow and refuse it instead of silently turning
+	// the request into an adjustment credit note.
+	const isRefundFlow = refundRequestedFromQuery;
+	const requiresRefundGuards = isRefundType || isRefundFlow;
+	const refundIsAvailable = isRefundType && refundIsEligible;
+	const pageTitle = isRefundFlow ? t('creditNotes.refunds.pageTitle') : t('creditNotes.issuePageTitle');
 
 	// Initialize line items when invoice data is loaded
 	useEffect(() => {
 		if (invoice?.line_items) {
-			const initialLineItems: LineItemForm[] = invoice.line_items.map((item) => {
+			const initialLineItems: CreditNoteLineItemForm[] = invoice.line_items.map((item) => {
 				const quantity = parseFloat(item.quantity) || 1;
 				const unit_price = item.amount / quantity;
 
@@ -100,9 +115,9 @@ const AddCreditNotePage = () => {
 		if (invoice) {
 			updateBreadcrumb(2, invoice.customer?.external_id || t('creditNotes.fallbackCustomerName'));
 			updateBreadcrumb(4, invoice.invoice_number);
-			updateBreadcrumb(5, t('creditNotes.issuePageTitle'));
+			updateBreadcrumb(5, pageTitle);
 		}
-	}, [invoice, updateBreadcrumb, setSegmentLoading, t]);
+	}, [invoice, updateBreadcrumb, setSegmentLoading, pageTitle, t]);
 
 	const reasonOptions: SelectOption[] = useMemo(
 		() => [
@@ -118,14 +133,44 @@ const AddCreditNotePage = () => {
 	);
 
 	// Create credit note mutation
+	const submissionInFlightRef = useRef(false);
 	const createCreditNoteMutation = useMutation({
 		mutationFn: (params: CreateCreditNoteParams) => CreditNoteApi.createCreditNote(params),
-		onSuccess: (data: CreditNote) => {
-			queryClient.invalidateQueries({ queryKey: ['creditNotes'] });
+		onSuccess: async (data: CreditNote, variables: CreateCreditNoteParams) => {
+			const isRefundSubmission = variables.refund_target !== undefined;
+			if (isRefundSubmission) {
+				toast.success(t('creditNotes.refunds.submittedToast'));
+			}
+
+			const refreshes: Promise<void>[] = [
+				refetchInvoiceQueries(),
+				refetchQueries(['creditNotes']),
+				refetchQueries(['fetchCreditNotes']),
+				refetchQueries(['customerCreditNotes']),
+				refetchQueries(['fetchCreditNote']),
+			];
+			if (isRefundSubmission) {
+				// A refund can move money through payments and the customer wallet.
+				refreshes.push(
+					refetchQueries(['payments']),
+					refetchQueries(['fetchWallets']),
+					refetchQueries(['fetchWalletBalances']),
+					refetchQueries(['fetchWalletsTransactions']),
+					refetchQueries(['portal-wallets']),
+					refetchQueries(['portal-wallet-balance']),
+					refetchQueries(['portal-wallet-transactions']),
+				);
+			}
+
+			await Promise.allSettled(refreshes);
 			navigate(`${RouteNames.creditNotes}/${data.id}`);
 		},
-		onError: (error: Error) => {
-			toast.error(error.message || t('creditNotes.createError'));
+		onError: (error: Error, variables: CreateCreditNoteParams) => {
+			const fallback = variables.refund_target ? t('creditNotes.refunds.submitError') : t('creditNotes.createError');
+			toast.error(error.message || fallback);
+		},
+		onSettled: () => {
+			submissionInFlightRef.current = false;
 		},
 	});
 
@@ -134,7 +179,7 @@ const AddCreditNotePage = () => {
 	const validLineItems = useMemo(() => lineItems.filter((item) => item.amount > 0), [lineItems]);
 	const totalCreditAmount = validLineItems.reduce((sum, item) => sum + item.amount, 0);
 
-	const creditNotePreview = useMemo((): CreditNotePreview => {
+	const creditNotePreview = useMemo((): CreditNoteFormPreview => {
 		if (!invoice) {
 			return {
 				type: CREDIT_NOTE_TYPE.ADJUSTMENT,
@@ -183,20 +228,6 @@ const AddCreditNotePage = () => {
 		[validLineItems],
 	);
 
-	const buildParams = useCallback((): CreateCreditNoteParams | null => {
-		if (!selectedReason || creditNoteLineItems.length === 0 || !invoice_id) {
-			return null;
-		}
-
-		return {
-			invoice_id: invoice_id,
-			reason: selectedReason as CREDIT_NOTE_REASON,
-			memo: memo || undefined,
-			line_items: creditNoteLineItems,
-			process_credit_note: true,
-		};
-	}, [creditNoteLineItems, selectedReason, memo, invoice_id]);
-
 	// Quoted by the engine rather than summed here, because the tax on a credit is only known
 	// once it has been asked. Keyed on the amounts alone, so the figures are on screen before a
 	// reason is picked and a change of reason or memo does not re-ask. Debounced: every call is
@@ -214,7 +245,12 @@ const AddCreditNotePage = () => {
 		return () => clearTimeout(timer);
 	}, [previewParams]);
 
-	const { data: creditNoteQuote, isFetching: isQuoting } = useQuery({
+	const {
+		data: creditNoteQuote,
+		isFetching: isQuoting,
+		isError: quoteIsError,
+		error: quoteError,
+	} = useQuery({
 		queryKey: ['creditNotePreview', debouncedPreviewParams],
 		queryFn: async () => await CreditNoteApi.previewCreditNote(debouncedPreviewParams!),
 		enabled: Boolean(debouncedPreviewParams),
@@ -226,18 +262,93 @@ const AddCreditNotePage = () => {
 	// A quote is only good for the amounts that produced it. While it lags a keystroke the
 	// subtotal it was asked for no longer matches what is typed, so the pre-tax sum is the only
 	// honest figure to show until the next one lands.
+	const previewKey = useMemo(() => (previewParams ? JSON.stringify(previewParams) : null), [previewParams]);
+	const debouncedPreviewKey = useMemo(
+		() => (debouncedPreviewParams ? JSON.stringify(debouncedPreviewParams) : null),
+		[debouncedPreviewParams],
+	);
+	const quotedSubtotal = Number(creditNoteQuote?.subtotal ?? NaN);
 	const quotedTax = Number(creditNoteQuote?.total_tax ?? 0);
-	const quotedTotal = Number(creditNoteQuote?.total_amount ?? 0);
-	const quoteIsCurrent = Boolean(creditNoteQuote) && Math.abs(Number(creditNoteQuote?.subtotal ?? 0) - totalCreditAmount) < 0.005;
+	const quotedTotal = Number(creditNoteQuote?.total_amount ?? NaN);
+	const quoteIsCurrent =
+		Boolean(creditNoteQuote) &&
+		!isQuoting &&
+		!quoteIsError &&
+		previewKey !== null &&
+		previewKey === debouncedPreviewKey &&
+		Number.isFinite(quotedSubtotal) &&
+		Number.isFinite(quotedTax) &&
+		Number.isFinite(quotedTotal) &&
+		Math.abs(quotedSubtotal - totalCreditAmount) < 0.005;
 	const showTax = quoteIsCurrent && quotedTax > 0;
 	const displayedTotal = quoteIsCurrent ? quotedTotal : totalCreditAmount;
+	// Refund submissions are capped by what is actually left to refund, including tax. A quote
+	// that still belongs to older amounts, failed, or exceeds the cap can never be submitted.
+	const refundExceedsRemaining =
+		requiresRefundGuards && quoteIsCurrent && new Decimal(creditNoteQuote?.total_amount || 0).greaterThan(refundableAmount);
+	// A cached invoice can be stale; it must never authorize a refund while the fresh read is
+	// still in flight.
+	const canSubmit =
+		Boolean(selectedReason) &&
+		validLineItems.length > 0 &&
+		!isQuoting &&
+		!createCreditNoteMutation.isPending &&
+		(!requiresRefundGuards || (!isInvoiceFetching && refundIsAvailable && quoteIsCurrent && !refundExceedsRemaining));
 
-	// Handle form submission
-	const handleSubmit = () => {
-		const params = buildParams();
-		if (params) {
-			createCreditNoteMutation.mutate(params);
+	const buildParams = useCallback((): CreateCreditNoteParams | null => {
+		if (!selectedReason || creditNoteLineItems.length === 0 || !invoice_id) {
+			return null;
 		}
+		if (requiresRefundGuards && (isInvoiceFetching || !refundIsAvailable || !quoteIsCurrent || refundExceedsRemaining)) {
+			return null;
+		}
+
+		return {
+			invoice_id: invoice_id,
+			reason: selectedReason as CREDIT_NOTE_REASON,
+			memo: memo || undefined,
+			line_items: creditNoteLineItems,
+			process_credit_note: true,
+			// Adjustments must not carry a target; the backend only honours it for refunds.
+			...(isRefundType ? { refund_target: refundTarget } : {}),
+		};
+	}, [
+		creditNoteLineItems,
+		selectedReason,
+		memo,
+		invoice_id,
+		requiresRefundGuards,
+		isInvoiceFetching,
+		refundIsAvailable,
+		isRefundType,
+		quoteIsCurrent,
+		refundExceedsRemaining,
+		refundTarget,
+	]);
+
+	const handleOpenConfirm = () => {
+		if (!canSubmit || submissionInFlightRef.current) {
+			return;
+		}
+		setShowConfirmModal(true);
+	};
+
+	// Rechecks eligibility, quote freshness and the tax-inclusive cap at the moment of
+	// submission, not when the confirmation was opened.
+	const handleSubmit = () => {
+		if (createCreditNoteMutation.isPending || submissionInFlightRef.current) {
+			return;
+		}
+		const params = buildParams();
+		if (!params) {
+			if (requiresRefundGuards) {
+				toast.error(t('creditNotes.refunds.confirmBlocked'));
+				setShowConfirmModal(false);
+			}
+			return;
+		}
+		submissionInFlightRef.current = true;
+		createCreditNoteMutation.mutate(params);
 	};
 
 	if (isLoading) {
@@ -255,7 +366,10 @@ const AddCreditNotePage = () => {
 	return (
 		<Page>
 			{/* Confirmation Dialog */}
-			<Dialog isOpen={showConfirmModal} onOpenChange={setShowConfirmModal} title={t('creditNotes.confirmDialogTitle')}>
+			<Dialog
+				isOpen={showConfirmModal}
+				onOpenChange={setShowConfirmModal}
+				title={isRefundFlow ? t('creditNotes.refunds.confirmTitle') : t('creditNotes.confirmDialogTitle')}>
 				<div className='space-y-6 mt-6'>
 					{/* Summary */}
 					<div className='p-4 bg-surface-subtle rounded-lg space-y-3'>
@@ -265,6 +379,10 @@ const AddCreditNotePage = () => {
 								label={toSentenceCase(creditNotePreview.type)}
 								variant={creditNotePreview.type === CREDIT_NOTE_TYPE.REFUND ? 'success' : 'info'}
 							/>
+						</div>
+						<div className='flex justify-between items-center'>
+							<span className='text-sm text-content-tertiary'>{t('creditNotes.reasonSectionTitle')}</span>
+							<span className='text-sm font-medium'>{reasonOptions.find((option) => option.value === selectedReason)?.label ?? ''}</span>
 						</div>
 						<div className='flex justify-between items-center'>
 							<span className='text-sm text-content-tertiary'>{t('creditNotes.subtotalLabel')}</span>
@@ -277,27 +395,59 @@ const AddCreditNotePage = () => {
 								<span className='text-sm font-medium'>{formatCurrency(quotedTax, invoiceCurrency)}</span>
 							</div>
 						)}
+						{isRefundType && (
+							<div className='flex justify-between items-center'>
+								<span className='text-sm text-content-tertiary'>{t('creditNotes.refunds.remainingRefundable')}</span>
+								<span className='text-sm font-medium'>{formatCurrency(refundableAmount, invoiceCurrency)}</span>
+							</div>
+						)}
 						<div className='flex justify-between items-center'>
 							<span className='text-sm text-content-tertiary'>{t('creditNotes.totalAmountLabel')}</span>
 							<span className='text-sm font-semibold'>{formatCurrency(displayedTotal, invoiceCurrency)}</span>
 						</div>
+						{isRefundType && (
+							<div className='flex justify-between items-center'>
+								<span className='text-sm text-content-tertiary'>{t('creditNotes.refunds.destinationTitle')}</span>
+								<span className='text-sm font-medium'>
+									{refundTarget === REFUND_TARGET.BACK_TO_SOURCE
+										? t('creditNotes.refunds.backToSourceLabel')
+										: t('creditNotes.refunds.prepaidWalletLabel')}
+								</span>
+							</div>
+						)}
 					</div>
 					<div className=' border border-info-line rounded-lg p-4'>
 						<p className='text-sm text-info-deep'>{creditNotePreview.effectDescription}</p>
 					</div>
+					{isRefundType && (
+						<div className='border border-info-line rounded-lg p-4 space-y-2'>
+							<p className='text-sm text-info-deep'>
+								{refundTarget === REFUND_TARGET.BACK_TO_SOURCE
+									? t('creditNotes.refunds.fallbackDisclosure')
+									: t('creditNotes.refunds.prepaidWalletDescription')}
+							</p>
+							<p className='text-sm text-info-deep'>{t('creditNotes.refunds.asyncDisclosure')}</p>
+						</div>
+					)}
+					{refundExceedsRemaining && (
+						<p className='text-sm text-destructive'>
+							{t('creditNotes.refunds.quoteExceedsLimit', { amount: formatCurrency(refundableAmount, invoiceCurrency) })}
+						</p>
+					)}
 
 					{/* Actions */}
 					<div className='flex justify-end gap-3 pt-4'>
 						<Button onClick={() => setShowConfirmModal(false)} variant='outline'>
 							{t('common:actions.cancel')}
 						</Button>
-						<Button
-							onClick={() => {
-								setShowConfirmModal(false);
-								handleSubmit();
-							}}
-							disabled={createCreditNoteMutation.isPending}>
-							{createCreditNoteMutation.isPending ? t('createInvoice.creating') : t('creditNotes.createCreditNoteCta')}
+						<Button onClick={handleSubmit} disabled={!canSubmit}>
+							{createCreditNoteMutation.isPending
+								? isRefundType
+									? t('creditNotes.refunds.submitting')
+									: t('createInvoice.creating')
+								: isRefundFlow
+									? t('creditNotes.refunds.confirmCta')
+									: t('creditNotes.createCreditNoteCta')}
 						</Button>
 					</div>
 				</div>
@@ -308,12 +458,24 @@ const AddCreditNotePage = () => {
 				{/* Header */}
 				<div className='flex items-center gap-2'>
 					<PremiumFeatureIcon />
-					<h1 className='text-xl font-medium'>{t('creditNotes.issuePageTitle')}</h1>
+					<h1 className='text-xl font-medium'>{pageTitle}</h1>
 					<Chip
 						label={toSentenceCase(creditNotePreview.type)}
 						variant={creditNotePreview.type === CREDIT_NOTE_TYPE.REFUND ? 'success' : 'info'}
 					/>
 				</div>
+
+				{requiresRefundGuards && !refundIsAvailable && (
+					<div role='alert' className='rounded-lg border border-line bg-surface-subtle p-4'>
+						<p className='text-sm text-destructive'>{t('creditNotes.refunds.ineligible')}</p>
+					</div>
+				)}
+
+				{requiresRefundGuards && quoteIsError && (
+					<div role='alert' className='rounded-lg border border-line bg-surface-subtle p-4'>
+						<p className='text-sm text-destructive'>{quoteError?.message || t('creditNotes.refunds.quoteError')}</p>
+					</div>
+				)}
 
 				{/* Invoice Summary */}
 				<div className='bg-surface border rounded-lg p-6'>
@@ -345,6 +507,31 @@ const AddCreditNotePage = () => {
 							className='max-w-md'
 						/>
 					</div>
+
+					{isRefundType && (
+						<div className='flex flex-col gap-3'>
+							<h3 className='text-sm font-semibold'>{t('creditNotes.refunds.destinationTitle')}</h3>
+							<CheckboxRadioGroup
+								checkboxItems={[
+									{
+										label: t('creditNotes.refunds.backToSourceLabel'),
+										value: REFUND_TARGET.BACK_TO_SOURCE,
+										description: t('creditNotes.refunds.backToSourceDescription'),
+										disabled: !refundIsEligible,
+									},
+									{
+										label: t('creditNotes.refunds.prepaidWalletLabel'),
+										value: REFUND_TARGET.PREPAID_WALLET,
+										description: t('creditNotes.refunds.prepaidWalletDescription'),
+										disabled: !refundIsEligible,
+									},
+								]}
+								value={refundTarget}
+								onChange={(value) => setRefundTarget(value as REFUND_TARGET)}
+							/>
+							<p className='text-sm text-content-muted'>{t('creditNotes.refunds.destinationHint')}</p>
+						</div>
+					)}
 
 					{/* Memo */}
 					<div className=''>
@@ -405,6 +592,13 @@ const AddCreditNotePage = () => {
 									<span className='text-sm text-content font-medium'>{formatCurrency(totalCreditAmount, invoiceCurrency)}</span>
 								</div>
 
+								{requiresRefundGuards && (
+									<div className='flex justify-between items-center py-1'>
+										<span className='text-sm text-content-tertiary'>{t('creditNotes.refunds.remainingRefundable')}</span>
+										<span className='text-sm text-content font-medium'>{formatCurrency(refundableAmount, invoiceCurrency)}</span>
+									</div>
+								)}
+
 								{/* Only present when an engine actually taxed the credit, and only once the
 								    quote on screen is the one for the amounts on screen. */}
 								{(showTax || isQuoting) && (
@@ -427,6 +621,13 @@ const AddCreditNotePage = () => {
 									</span>
 									<span className='text-base font-semibold text-content'>{formatCurrency(displayedTotal, invoiceCurrency)}</span>
 								</div>
+								{refundExceedsRemaining && (
+									<p className='text-sm text-destructive text-right'>
+										{t('creditNotes.refunds.quoteExceedsLimit', {
+											amount: formatCurrency(refundableAmount, invoiceCurrency),
+										})}
+									</p>
+								)}
 							</div>
 						</div>
 					</div>
@@ -434,11 +635,8 @@ const AddCreditNotePage = () => {
 
 				{/* Actions */}
 				<div className='flex justify-end'>
-					<Button
-						isLoading={createCreditNoteMutation.isPending}
-						onClick={() => setShowConfirmModal(true)}
-						disabled={!selectedReason || validLineItems.length === 0 || isQuoting || createCreditNoteMutation.isPending}>
-						{t('creditNotes.createCreditNoteCta')}
+					<Button isLoading={createCreditNoteMutation.isPending} onClick={handleOpenConfirm} disabled={!canSubmit}>
+						{isRefundFlow ? t('creditNotes.refunds.cta') : t('creditNotes.createCreditNoteCta')}
 					</Button>
 				</div>
 			</div>

@@ -34,6 +34,8 @@ export async function initI18n(locale: string, direction: Direction): Promise<vo
 				fallbackLng: 'en',
 				defaultNS: 'common',
 				ns: NAMESPACES,
+				// zh-CN has no separate `zh` bundle; only resolve the exact locale plus the English fallback.
+				load: 'currentOnly',
 				partialBundledLanguages: true,
 				interpolation: { escapeValue: false },
 			});

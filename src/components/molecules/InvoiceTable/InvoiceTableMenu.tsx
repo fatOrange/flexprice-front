@@ -18,6 +18,7 @@ import { PAYMENT_DESTINATION_TYPE } from '@/models/Payment';
 import { PAYMENT_STATUS } from '@/constants';
 import { RouteNames } from '@/core/routes/Routes';
 import { useCurrentUserPermissions } from '@/hooks/useCurrentUserPermissions';
+import { canRefundInvoice } from '@/utils/invoices/refund';
 
 interface Props {
 	data: InvoiceListItem;
@@ -29,6 +30,7 @@ const InvoiceTableMenu: FC<Props> = ({ data }) => {
 	const { t: tc } = useTranslation('common');
 	const { can } = useCurrentUserPermissions();
 	const canWrite = can('invoice', 'write');
+	const canCreateCreditNote = can('creditnote', 'write');
 	const writeDeniedReason = canWrite ? undefined : t('invoices.writeDenied');
 	// /compute accepts DRAFT and SKIPPED only (anything else is a 400); /recalculate takes it
 	// from there for a FINALIZED invoice. A voided invoice is the end of the line for both, and
@@ -37,6 +39,10 @@ const InvoiceTableMenu: FC<Props> = ({ data }) => {
 	const isRecalculable = (computesInPlace || data.invoice_status === INVOICE_STATUS.FINALIZED) && !data.recalculated_invoice_id;
 	// PUT /invoices/:id only accepts DRAFT and FINALIZED invoices.
 	const isEditableStatus = data.invoice_status === INVOICE_STATUS.DRAFT || data.invoice_status === INVOICE_STATUS.FINALIZED;
+	const canRefund = canRefundInvoice(data);
+	// OVERPAID has no backend refund path at all, so it gets no menu entry rather than a dead one.
+	const isRefundSupported = data.payment_status !== PAYMENT_STATUS.OVERPAID;
+	const refundDisabledReason = !canCreateCreditNote ? t('refunds.writeDenied') : !canRefund ? t('refunds.unavailable') : undefined;
 
 	const { mutate: triggerCommunication } = useMutation({
 		mutationFn: async (invoice_id: string) => {
@@ -127,6 +133,18 @@ const InvoiceTableMenu: FC<Props> = ({ data }) => {
 		isRecordPaymentDrawerOpen: false,
 	});
 
+	const refundOption: DropdownMenuOption = {
+		label: t('refunds.action'),
+		group: 'Actions',
+		disabled: !canCreateCreditNote || !canRefund,
+		disabledReason: refundDisabledReason,
+		onSelect: () => {
+			// Re-check in the handler: a disabled menu item is presentation, not authorization.
+			if (!canCreateCreditNote || !canRefund) return;
+			navigate(`${RouteNames.customers}/${data.customer_id}/invoice/${data.id}/credit-note?refund_target=BACK_TO_SOURCE`);
+		},
+	};
+
 	const menuOptions: DropdownMenuOption[] = [
 		getCopyIdOption(data.id, tc, { entityType: 'Invoice' }),
 		{
@@ -200,12 +218,15 @@ const InvoiceTableMenu: FC<Props> = ({ data }) => {
 		{
 			label: 'Issue a Credit Note',
 			group: 'Actions',
-			disabled: !canWrite || data?.invoice_status !== 'FINALIZED' || data?.payment_status === 'REFUNDED',
-			disabledReason: writeDeniedReason,
+			// The destination route and createCreditNote both require creditnote:write, not invoice:write.
+			disabled: !canCreateCreditNote || data.invoice_status !== INVOICE_STATUS.FINALIZED || data.payment_status === PAYMENT_STATUS.REFUNDED,
+			disabledReason: !canCreateCreditNote ? t('creditNotes.writeDeniedTooltip') : undefined,
 			onSelect: () => {
-				navigate(`${RouteNames.customers}/${data?.customer_id}/invoice/${data?.id}/credit-note`);
+				navigate(`${RouteNames.customers}/${data.customer_id}/invoice/${data.id}/credit-note`);
 			},
 		},
+		// Refunding is issuing a credit note with refund_target, so it reuses that flow.
+		...(isRefundSupported ? [refundOption] : []),
 		{
 			label: t('invoices.recompute.menuLabel'),
 			group: 'Actions',

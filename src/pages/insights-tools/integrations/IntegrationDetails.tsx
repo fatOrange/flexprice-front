@@ -17,6 +17,7 @@ import MoyasarConnectionDrawer from '@/components/molecules/MoyasarConnectionDra
 import PaddleConnectionDrawer from '@/components/molecules/PaddleConnectionDrawer';
 import WhopConnectionDrawer from '@/components/molecules/WhopConnectionDrawer';
 import TabsConnectionDrawer from '@/components/molecules/TabsConnectionDrawer';
+import WechatPayConnectionDrawer from '@/components/molecules/WechatPayConnectionDrawer/WechatPayConnectionDrawer';
 import { PencilIcon, TrashIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { ApiDocsContent } from '@/components/molecules';
@@ -265,6 +266,16 @@ const IntegrationDetails = () => {
 				/>
 			) : name.toLowerCase() === CONNECTION_PROVIDER_TYPE.TABS ? (
 				<TabsConnectionDrawer
+					isOpen={isDrawerOpen}
+					onOpenChange={(open) => {
+						setIsDrawerOpen(open);
+						if (!open) setEditingConnection(null);
+					}}
+					connection={editingConnection}
+					onSave={handleSaveConnection}
+				/>
+			) : name.toLowerCase() === CONNECTION_PROVIDER_TYPE.WECHATPAY ? (
+				<WechatPayConnectionDrawer
 					isOpen={isDrawerOpen}
 					onOpenChange={(open) => {
 						setIsDrawerOpen(open);

@@ -1102,6 +1102,51 @@
 			"apiKeyPlaceholder": "أدخل مفتاح Tabs API الخاص بك",
 			"apiKeyHint": "مفتاح Tabs API الخاص بك (مثال: tabs_sk_...)",
 			"pushToTabs": "دفع إلى Tabs"
+		},
+		"wechatpay": {
+			"description": "اضبط اتصال تاجر WeChat Pay الخاص بك. يُشفَّر المفتاح الخاص للتاجر ومفتاح APIv3 عند التخزين.",
+			"connectionPlaceholder": "مثال: WeChat Pay الإنتاج",
+			"connectionHint": "اسم ودي لتحديد اتصال WeChat Pay هذا",
+			"editNoticeTitle": "لا يتم عرض بيانات الاعتماد المحفوظة",
+			"editNoticeBody": "يُشفَّر المفتاح الخاص للتاجر ومفتاح APIv3 عند التخزين، ولا يُعاد الإعداد المحفوظ إلى المتصفح. اترك الحقل فارغاً للإبقاء على قيمته المحفوظة؛ واملأه فقط لاستبدالها.",
+			"appId": "AppID",
+			"appIdPlaceholder": "wx0123456789abcdef",
+			"appIdHint": "معرّف AppID لحساب تاجر WeChat Pay الخاص بك، من منصة تاجر WeChat Pay.",
+			"appIdRequired": "AppID مطلوب",
+			"merchantId": "معرّف التاجر (mchid)",
+			"merchantIdPlaceholder": "مثال: 1900000109",
+			"merchantIdHint": "معرّف التاجر (mchid) الخاص بك في WeChat Pay.",
+			"merchantIdRequired": "معرّف التاجر مطلوب",
+			"certificateSerialNumber": "الرقم التسلسلي لشهادة التاجر",
+			"certificateSerialNumberPlaceholder": "الرقم التسلسلي لشهادة API الخاصة بالتاجر",
+			"certificateSerialNumberHint": "الرقم التسلسلي لشهادة API الخاصة بالتاجر التي يوقّع مفتاحها الخاص طلبات APIv3.",
+			"certificateSerialNumberRequired": "الرقم التسلسلي لشهادة التاجر مطلوب",
+			"merchantPrivateKey": "المفتاح الخاص للتاجر (PEM)",
+			"merchantPrivateKeyPlaceholder": "-----BEGIN PRIVATE KEY-----",
+			"merchantPrivateKeyPlaceholderEdit": "اتركه فارغاً للإبقاء على المفتاح الخاص المحفوظ، أو الصق مفتاح PEM جديداً لتدويره",
+			"merchantPrivateKeyHint": "مفتاح RSA خاص بصيغة PEM (PKCS#1 أو PKCS#8) لشهادة التاجر. يُخزَّن مشفّراً ولا يُعرض مرة أخرى.",
+			"merchantPrivateKeyRequired": "المفتاح الخاص للتاجر مطلوب",
+			"merchantPrivateKeyInvalid": "أدخل مفتاح RSA خاصاً مُرمَّزاً بصيغة PEM (PKCS#1 أو PKCS#8)",
+			"apiV3Key": "مفتاح APIv3",
+			"apiV3KeyPlaceholder": "32 بايت UTF-8 بالضبط",
+			"apiV3KeyPlaceholderEdit": "اتركه فارغاً للإبقاء على مفتاح APIv3 المحفوظ، أو أدخل مفتاحاً جديداً بطول 32 بايت UTF-8 بالضبط",
+			"apiV3KeyHint": "مفتاح APIv3 بطول 32 بايت UTF-8 بالضبط، ويُستخدم لفك تشفير إشعارات WeChat Pay. يُخزَّن مشفّراً ولا يُعرض مرة أخرى.",
+			"apiV3KeyRequired": "مفتاح APIv3 مطلوب",
+			"apiV3KeyInvalid": "يجب أن يكون مفتاح APIv3 بطول 32 بايت UTF-8 بالضبط",
+			"platformPublicKey": "المفتاح العام للمنصة (PEM)",
+			"platformPublicKeyPlaceholder": "-----BEGIN PUBLIC KEY-----",
+			"platformPublicKeyHint": "المفتاح العام لمنصة WeChat Pay بصيغة PEM، ويُستخدم للتحقق من توقيع الاستجابات والإشعارات.",
+			"platformPublicKeyRequired": "المفتاح العام للمنصة مطلوب",
+			"platformPublicKeyInvalid": "أدخل مفتاحاً عاماً مُرمَّزاً بصيغة PEM (-----BEGIN PUBLIC KEY-----)",
+			"platformPublicKeyId": "معرّف المفتاح العام للمنصة",
+			"platformPublicKeyIdPlaceholder": "مثال: PUB_KEY_ID_0000000000000000000000000000000000",
+			"platformPublicKeyIdHint": "معرّف المفتاح العام لمنصة WeChat Pay المستخدم للتحقق من التوقيع.",
+			"platformPublicKeyIdRequired": "معرّف المفتاح العام للمنصة مطلوب",
+			"notifyUrl": "عنوان الإشعار URL",
+			"notifyUrlPlaceholder": "https://api.example.com/v1/webhooks/wechatpay",
+			"notifyUrlHint": "عنوان https عام أساسي لمسار ويب هوك WeChat Pay. يُلحق Flexprice معرّفي المستأجر والبيئة لبناء عنوان الاستدعاء النهائي.",
+			"notifyUrlRequired": "عنوان الإشعار مطلوب",
+			"notifyUrlInvalid": "أدخل عنوان https عاماً يتضمن مساراً — بدون query أو fragment أو بيانات اعتماد أو localhost أو نطاقات خاصة"
 		}
 	},
 	"insightsTools": {
@@ -1520,6 +1565,37 @@
 						"invoiceSync": {
 							"title": "مزامنة الفواتير",
 							"paragraphs": ["عند تفعيل مزامنة الفواتير، يرسل Flexprice الفواتير المكتملة تلقائياً إلى Tabs."]
+						}
+					}
+				},
+				"wechatpay": {
+					"name": "WeChat Pay",
+					"description": "حصّل مدفوعات الفواتير من مستخدمي WeChat عبر دفع Native برمز QR ودفع JSAPI.",
+					"sections": {
+						"overview": {
+							"title": "نظرة عامة",
+							"paragraphs": [
+								"يتيح تطبيق Flexprice لـ WeChat Pay لعملائك دفع فواتيرهم في Flexprice عبر WeChat Pay. يختار كل دفع نوع الدفع: Native على سطح المكتب، حيث يمسح العميل رمز QR بتطبيق WeChat، أو JSAPI حيث يكتمل الدفع داخل متصفح WeChat أو برنامج مصغّر. المدفوعات يحضرها العميل — لا يوجد خصم تلقائي أو طريقة دفع محفوظة — وتُعلَّم الفاتورة كمدفوعة عندما يؤكد WeChat Pay الدفع."
+							]
+						},
+						"nativeQrPayments": {
+							"title": "مدفوعات Native (رمز QR)",
+							"paragraphs": [
+								"ينشئ دفع Native طلب WeChat Pay مسبقاً ويعيد حمولة رمز QR. يمسح العميل الرمز بتطبيق WeChat على هاتفه ويؤكد الدفع، ويعلّم Flexprice الفاتورة كمدفوعة فور استلام إشعار الدفع من WeChat Pay."
+							]
+						},
+						"jsapiPayments": {
+							"title": "مدفوعات JSAPI",
+							"paragraphs": [
+								"يعيد دفع JSAPI معاملات الدفع الموقَّعة التي يستخدمها متصفح WeChat أو البرنامج المصغّر لفتح نافذة الدفع في WeChat، فيدفع العميل دون مغادرة الصفحة. ويعلّم Flexprice الفاتورة كمدفوعة فور استلام إشعار الدفع."
+							]
+						},
+						"webhooks": {
+							"title": "إشعارات الدفع",
+							"paragraphs": [
+								"يرسل WeChat Pay إشعارات دفع موقَّعة إلى عنوان الإشعار URL المضبوط على الاتصال. يتحقق Flexprice من كل توقيع ويفك تشفير الحمولة بمفتاح APIv3 قبل تعليم الفاتورة كمدفوعة.",
+								"وجّه عنوان الإشعار إلى العنوان https العام الأساسي لـ /v1/webhooks/wechatpay — يُلحق Flexprice معرّفي المستأجر والبيئة لتوجيه كل استدعاء."
+							]
 						}
 					}
 				},

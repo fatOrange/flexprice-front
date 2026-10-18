@@ -22,6 +22,7 @@ export enum CONNECTION_PROVIDER_TYPE {
 	PADDLE = 'paddle',
 	WHOP = 'whop',
 	TABS = 'tabs',
+	WECHATPAY = 'wechatpay',
 	AWS_MARKETPLACE = 'aws_marketplace',
 	GCP_MARKETPLACE = 'gcp_marketplace',
 	AZURE_MARKETPLACE = 'azure_marketplace',

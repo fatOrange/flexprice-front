@@ -16,6 +16,7 @@ export type { AuthPageConfig, Template2Config, RegionOption, RegionsConfig };
 export enum Locale {
 	En = 'en',
 	Ar = 'ar',
+	ZhCn = 'zh-CN',
 	He = 'he',
 	Fa = 'fa',
 	Ur = 'ur',
@@ -39,7 +40,7 @@ export interface I18nConfig {
 	direction: Direction;
 }
 
-export const SUPPORTED_LOCALES: Locale[] = [Locale.En, Locale.Ar];
+export const SUPPORTED_LOCALES: Locale[] = [Locale.En, Locale.Ar, Locale.ZhCn];
 
 export const RTL_LOCALES = new Set<Locale>([Locale.Ar, Locale.He, Locale.Fa, Locale.Ur]);
 

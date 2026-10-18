@@ -8,6 +8,7 @@ import { Locale } from '@/config/branding';
 const LOCALE_LABELS: Record<Locale, string> = {
 	[Locale.En]: 'English',
 	[Locale.Ar]: 'العربية',
+	[Locale.ZhCn]: '简体中文',
 	[Locale.He]: 'עברית',
 	[Locale.Fa]: 'فارسی',
 	[Locale.Ur]: 'اردو',

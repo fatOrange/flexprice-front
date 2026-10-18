@@ -349,3 +349,26 @@ describe('Features', () => {
 3. Implement request debouncing
 4. Use compression for large payloads
 5. Implement proper error boundaries
+
+## WeChat Pay connection configuration
+
+Open `/tools/integrations` and enable **WeChat Pay** to configure the ordinary merchant connection. The same drawer is available at `/tools/integrations/wechatpay`.
+
+- Create requires a connection name and all eight WeChat Pay configuration fields. Requests use `ConnectionApi` and the current tenant/environment authentication context.
+- Editing prefills only the connection name. The backend omits all `encrypted_secret_data` from responses, including non-secret configuration. Blank fields preserve saved values; entered fields replace them through a sparse update.
+- The merchant private key and APIv3 key are encrypted at rest by the backend. The browser does not persist entered credentials. APIv3 keys must be exactly 32 UTF-8 bytes.
+- The notify URL is a public HTTPS base such as `https://api.example.com/v1/webhooks/wechatpay`. The backend appends tenant and environment IDs; do not append them in the form or use localhost.
+- Saving confirms configuration storage, not merchant permissions or a successful payment. Native QR and JSAPI payments are initiated through the backend payment API, not this configuration drawer.
+- Disconnect requires confirmation and deletes the connection in the current environment. Connection write permission is required for creation, editing, and disconnection.
+
+No SDK regeneration is required for this UI: it uses the existing `/connections` HTTP client. This provider does not expose synchronization, recurring charging, or automatic renewal settings.
+
+## Invoice refunds
+
+- Use **Refund payment** in an invoice's action menu or detail header. Creation requires `creditnote:write`, a `FINALIZED` invoice, payment status `SUCCEEDED` or `PARTIALLY_REFUNDED`, and a positive remaining paid amount. Fully refunded and overpaid invoices cannot start this flow.
+- The action opens the existing credit-note form with `refund_target=BACK_TO_SOURCE`. Select a reason, line-item amounts, and the refund destination, then review the tax-inclusive quote and confirmation. Refunds cannot exceed `amount_paid - refunded_amount`; pending, stale, or failed quotes cannot be submitted.
+- Submission uses `POST /creditnotes` through `CreditNoteApi.createCreditNote`, with `process_credit_note: true` and an explicit `refund_target` (`BACK_TO_SOURCE` or `PREPAID_WALLET`). There is no `POST /refunds` endpoint.
+- Original-method refunds are attempted where supported; the backend may settle to the customer's wallet instead. WeChat Pay original-method refunds require the full original transaction amount. Backend rejection messages remain visible in the form.
+- A successful credit-note response means the refund was submitted, not necessarily settled. Settlement records are available through `GET /refunds?invoice_ids=<invoice_id>`. Invoice, credit-note, payment, and wallet queries are refreshed after submission.
+- The existing **Issue a Credit Note** entry retains its prepaid-wallet default for paid invoices; unpaid-invoice adjustments do not send a refund target.
+

@@ -29,7 +29,13 @@ export type {
 	ReportingUnit,
 } from './Feature';
 
-export type { GetConnectionsPayload, GetConnectionsResponse, CreateConnectionPayload, UpdateConnectionPayload } from './Connection';
+export type {
+	GetConnectionsPayload,
+	GetConnectionsResponse,
+	CreateConnectionPayload,
+	UpdateConnectionPayload,
+	WechatPayConnectionMetadata,
+} from './Connection';
 
 export type {
 	GetEventsPayload,
@@ -252,6 +258,8 @@ export type {
 	PreviewCreditNoteParams,
 	CreditNotePreviewResponse,
 	CreateCreditNoteLineItemRequest,
+	CreditNoteLineItemForm,
+	CreditNoteFormPreview,
 	ProcessDraftCreditNoteParams,
 	VoidCreditNoteParams,
 	ListCreditNotesResponse,
@@ -267,7 +275,7 @@ export type {
 	CloneEnvironmentResponse,
 } from './Environment';
 
-export { CREDIT_NOTE_STATUS, CREDIT_NOTE_REASON, CREDIT_NOTE_TYPE } from '@/models';
+export { CREDIT_NOTE_STATUS, CREDIT_NOTE_REASON, CREDIT_NOTE_TYPE, REFUND_TARGET } from '@/models';
 
 export type {
 	CreatePlanRequest,

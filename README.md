@@ -173,6 +173,20 @@ npm run dev
 
 Visit `http://localhost:3000` to see your app running!
 
+### Localization
+
+The UI ships with English (`en`), Arabic (`ar`), and Simplified Chinese (`zh-CN`) translations. English is the default and fallback language; Arabic is RTL and Simplified Chinese is LTR.
+
+- Translation resources live in `src/i18n/locales/<locale>/<namespace>.json`. Every locale must keep the same keys as `src/i18n/locales/en` (including plural keys such as `_one`/`_other`, even when a language uses fewer plural forms).
+- The language selector in the header only appears when more than one locale is allowed.
+- When `allowedLocales` is not configured, all supported locales — including `zh-CN` — are available. An explicit list is respected as-is, so include `zh-CN` to offer Chinese:
+
+```dotenv
+VITE_AUTH_CONFIG={"allowedLocales":["en","zh-CN"]}
+```
+
+- To change the initial language, set `VITE_DEFAULT_LOCALE` (for example `VITE_DEFAULT_LOCALE=zh-CN`). Unknown values fall back to `en`, and a language persisted from a previous session takes precedence over this default.
+
 ## 🏗 Project Structure
 
 ```
@@ -202,20 +216,101 @@ src/
 
 ### Docker Deployment
 
-1. **Build the Docker image**
+The production image is Nginx serving the compiled SPA. Vite configuration is
+baked into the browser bundle at build time, so there are no runtime `-e`
+variables: create `.env` before building and rebuild whenever it changes.
+
+1. **Configure the frontend environment**
 
 ```bash
-docker build -t flexprice-frontend .
+cp .env.example .env
 ```
 
-2. **Run the container**
+Set at least these values in `.env`:
+
+```dotenv
+VITE_APP_ENV=self-hosted
+VITE_API_URL=https://api.example.com/v1
+```
+
+`VITE_API_URL` must be reachable from your users' browsers and include the
+`/v1` suffix. Only public `VITE_*` values belong in `.env`; never put server or
+API secrets there, because they are compiled into the public JavaScript bundle.
+
+2. **Build and run with Docker Compose (recommended)**
 
 ```bash
-docker run -p 80:80 \
-  -e VITE_API_URL=your-api-url \
-  -e VITE_AUTH_DOMAIN=your-auth-domain \
-  flexprice-frontend
+docker compose up -d --build
 ```
+
+This builds the `production` target, injects `.env` as a BuildKit secret
+(`frontend_env`), and serves the app at http://localhost:3000.
+
+Docker BuildKit is required. For a direct build:
+
+```bash
+FRONTEND_CONFIG_HASH=$(openssl dgst -sha256 .env | cut -d ' ' -f2)
+
+docker build \
+  --target production \
+  --secret id=frontend_env,src=.env \
+  --build-arg FRONTEND_CONFIG_HASH="$FRONTEND_CONFIG_HASH" \
+  -t flexprice-frontend .
+
+docker run -d --name flexprice-frontend -p 3000:80 flexprice-frontend
+```
+
+The secret keeps `.env` out of the image layers, while the hash invalidates the
+cached build step when the configuration changes.
+
+3. **GitHub Actions → Huawei SWR**
+
+Pushing to `main`, or manually running the workflow from `main`, publishes a
+`linux/amd64` image built from the `production` target. Other branches are
+skipped. Workflow: `.github/workflows/build-swr.yml`.
+
+Configure these under **Settings → Secrets and variables → Actions**:
+
+| Type     | Name                  | Value                                                        |
+| -------- | --------------------- | ------------------------------------------------------------ |
+| Secret   | `SWR_USERNAME`        | Username with push access to the SWR region/org/repository   |
+| Secret   | `SWR_PASSWORD`        | Password or login token for that username                    |
+| Variable | `FRONTEND_BUILD_ENV`  | Complete `.env` contents: public `VITE_*` values only        |
+
+`FRONTEND_BUILD_ENV` is multiline dotenv content:
+
+```dotenv
+VITE_APP_ENV=self-hosted
+VITE_API_URL=https://api.example.com/v1
+```
+
+The repository `swr.cn-east-3.myhuaweicloud.com/digitprint/flexprice-front` must
+already exist, and the credentials must be allowed to push to that repository.
+Each build publishes:
+
+- `latest` — mutable, tracks the most recent successful `main` build.
+- `sha-${GITHUB_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}` — immutable, for
+  pinned deploys and rollbacks.
+- The image digest, reported in the workflow run summary.
+
+To pull and run the published image:
+
+```bash
+export SWR_USERNAME=your-swr-username
+read -rsp "SWR password: " SWR_PASSWORD; echo
+printf '%s' "$SWR_PASSWORD" | docker login swr.cn-east-3.myhuaweicloud.com \
+  --username "$SWR_USERNAME" --password-stdin
+unset SWR_PASSWORD
+
+docker pull swr.cn-east-3.myhuaweicloud.com/digitprint/flexprice-front:latest
+docker run -d --name flexprice-frontend-swr -p 3000:80 \
+  swr.cn-east-3.myhuaweicloud.com/digitprint/flexprice-front:latest
+```
+
+Editing `FRONTEND_BUILD_ENV` does not affect already-built images or running
+containers; it takes effect only on a new workflow run (or a new local build).
+SWR images are `linux/amd64`, so on ARM hosts use an amd64 machine or platform
+emulation.
 
 ### Manual Deployment
 

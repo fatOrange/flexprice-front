@@ -1103,6 +1103,51 @@
 			"apiKeyPlaceholder": "Enter your Tabs API key",
 			"apiKeyHint": "Your Tabs API key (e.g., tabs_sk_...)",
 			"pushToTabs": "Push to Tabs"
+		},
+		"wechatpay": {
+			"description": "Configure your WeChat Pay merchant connection. The merchant private key and APIv3 key are encrypted at rest.",
+			"connectionPlaceholder": "e.g. WeChat Pay Production",
+			"connectionHint": "A friendly name to identify this WeChat Pay connection",
+			"editNoticeTitle": "Saved credentials are not shown",
+			"editNoticeBody": "The merchant private key and APIv3 key are encrypted at rest. Saved configuration is not returned to the browser. Leave a field blank to keep its saved value; fill it in only to replace it.",
+			"appId": "AppID",
+			"appIdPlaceholder": "wx0123456789abcdef",
+			"appIdHint": "AppID of your WeChat Pay merchant account, from the WeChat Pay merchant platform.",
+			"appIdRequired": "AppID is required",
+			"merchantId": "Merchant ID (mchid)",
+			"merchantIdPlaceholder": "e.g. 1900000109",
+			"merchantIdHint": "Your WeChat Pay merchant ID (mchid).",
+			"merchantIdRequired": "Merchant ID is required",
+			"certificateSerialNumber": "Merchant Certificate Serial Number",
+			"certificateSerialNumberPlaceholder": "Serial number of the merchant API certificate",
+			"certificateSerialNumberHint": "Serial number of the merchant API certificate whose private key signs APIv3 requests.",
+			"certificateSerialNumberRequired": "Merchant certificate serial number is required",
+			"merchantPrivateKey": "Merchant Private Key (PEM)",
+			"merchantPrivateKeyPlaceholder": "-----BEGIN PRIVATE KEY-----",
+			"merchantPrivateKeyPlaceholderEdit": "Leave blank to keep the saved private key, or paste a new PEM to rotate it",
+			"merchantPrivateKeyHint": "RSA private key in PEM form (PKCS#1 or PKCS#8) for the merchant certificate. Stored encrypted and never displayed again.",
+			"merchantPrivateKeyRequired": "Merchant private key is required",
+			"merchantPrivateKeyInvalid": "Enter a PEM-encoded RSA private key (PKCS#1 or PKCS#8)",
+			"apiV3Key": "APIv3 Key",
+			"apiV3KeyPlaceholder": "Exactly 32 UTF-8 bytes",
+			"apiV3KeyPlaceholderEdit": "Leave blank to keep the saved APIv3 key, or enter a new key of exactly 32 UTF-8 bytes",
+			"apiV3KeyHint": "APIv3 key of exactly 32 UTF-8 bytes, used to decrypt WeChat Pay callbacks. Stored encrypted and never displayed again.",
+			"apiV3KeyRequired": "APIv3 key is required",
+			"apiV3KeyInvalid": "APIv3 key must be exactly 32 UTF-8 bytes",
+			"platformPublicKey": "Platform Public Key (PEM)",
+			"platformPublicKeyPlaceholder": "-----BEGIN PUBLIC KEY-----",
+			"platformPublicKeyHint": "WeChat Pay platform public key in PEM form, used to verify signed responses and callbacks.",
+			"platformPublicKeyRequired": "Platform public key is required",
+			"platformPublicKeyInvalid": "Enter a PEM-encoded public key (-----BEGIN PUBLIC KEY-----)",
+			"platformPublicKeyId": "Platform Public Key ID",
+			"platformPublicKeyIdPlaceholder": "e.g. PUB_KEY_ID_0000000000000000000000000000000000",
+			"platformPublicKeyIdHint": "ID of the WeChat Pay platform public key used for signature verification.",
+			"platformPublicKeyIdRequired": "Platform public key ID is required",
+			"notifyUrl": "Notify URL",
+			"notifyUrlPlaceholder": "https://api.example.com/v1/webhooks/wechatpay",
+			"notifyUrlHint": "Public https base URL of the WeChat Pay webhook route. Flexprice appends the tenant and environment IDs to build the final callback URL.",
+			"notifyUrlRequired": "Notify URL is required",
+			"notifyUrlInvalid": "Enter a public https URL with a path — no query, fragment, credentials, localhost, or private hosts"
 		}
 	},
 	"insightsTools": {
@@ -1567,6 +1612,37 @@
 						"invoiceSync": {
 							"title": "Invoice Sync",
 							"paragraphs": ["When invoice sync is enabled, Flexprice automatically pushes finalized invoices to Tabs."]
+						}
+					}
+				},
+				"wechatpay": {
+					"name": "WeChat Pay",
+					"description": "Collect invoice payments from WeChat users with Native QR and JSAPI checkout.",
+					"sections": {
+						"overview": {
+							"title": "Overview",
+							"paragraphs": [
+								"The Flexprice WeChat Pay app lets your customers pay their Flexprice invoices with WeChat Pay. Each checkout chooses a payment type: Native on desktop, where the customer scans a QR code with WeChat, or JSAPI, where payment completes inside a WeChat browser or mini program. Payments are customer-present — there is no automatic charging or saved payment method — and the invoice is marked paid when WeChat Pay confirms the payment."
+							]
+						},
+						"nativeQrPayments": {
+							"title": "Native Payments (QR Code)",
+							"paragraphs": [
+								"Native checkout pre-creates the WeChat Pay order and returns a QR code payload. The customer scans it with WeChat on their phone and confirms the payment, and Flexprice marks the invoice paid once WeChat Pay delivers the payment notification."
+							]
+						},
+						"jsapiPayments": {
+							"title": "JSAPI Payments",
+							"paragraphs": [
+								"JSAPI checkout returns the signed payment parameters a WeChat browser or mini program uses to open the WeChat payment sheet, so the customer pays without leaving the page. Flexprice marks the invoice paid as soon as the payment notification is received."
+							]
+						},
+						"webhooks": {
+							"title": "Payment Notifications",
+							"paragraphs": [
+								"WeChat Pay delivers signed payment notifications to the notify URL configured on the connection. Flexprice verifies each signature and decrypts the payload with the APIv3 key before marking the invoice paid.",
+								"Point the notify URL at the public https base of /v1/webhooks/wechatpay — Flexprice appends the tenant and environment to route each callback."
+							]
 						}
 					}
 				},

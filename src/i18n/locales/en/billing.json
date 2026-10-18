@@ -264,9 +264,31 @@
 		"amountPlaceholder": "0.00",
 		"unnamedLineItem": "Unnamed Item",
 		"fallbackCustomerName": "Customer",
+		"refunds": {
+			"pageTitle": "Refund payment",
+			"cta": "Refund payment",
+			"confirmTitle": "Confirm refund",
+			"confirmCta": "Submit refund",
+			"submitting": "Submitting...",
+			"destinationTitle": "Refund destination",
+			"destinationHint": "Refunds to the original payment method depend on the payment provider. If it cannot be reached, the amount may be credited to the customer's prepaid wallet.",
+			"backToSourceLabel": "Original payment method",
+			"backToSourceDescription": "Attempt to return the money to the method used for this invoice.",
+			"prepaidWalletLabel": "Prepaid wallet",
+			"prepaidWalletDescription": "Credit the refund to the customer's prepaid wallet.",
+			"fallbackDisclosure": "The original payment method is attempted first. Non-card payments and destinations that cannot be reached may be refunded to the customer's prepaid wallet.",
+			"asyncDisclosure": "Submitting this credit note starts the refund. Settlement may be asynchronous and is not complete when the credit note is created.",
+			"remainingRefundable": "Remaining refundable",
+			"ineligible": "This invoice cannot be refunded. Only finalized invoices with a successful payment and a positive refundable balance can be refunded.",
+			"quoteError": "Could not calculate the refund total. Adjust the amounts and try again.",
+			"quoteExceedsLimit": "The total including tax exceeds the remaining refundable amount of {{amount}}.",
+			"confirmBlocked": "The refund details are out of date. Review the amount and destination, then try again.",
+			"submitError": "Failed to submit refund.",
+			"submittedToast": "Refund submitted. Settlement may take time."
+		},
 		"preview": {
-			"refundEffect": "This credit note will process a refund for the paid amount.",
-			"refundSettlement": "The refunded amount will be credited to the customer's original payment method or wallet balance.",
+			"refundEffect": "This credit note starts a refund for the paid amount.",
+			"refundSettlement": "Refunds usually return to the original payment method; if that is unavailable, the amount may be credited to the customer's prepaid wallet. Settlement can take time.",
 			"adjustmentEffect": "This credit note will adjust the current invoice amount.",
 			"adjustmentSettlement": "The adjustment will be applied to the current billing period, reducing the amount due."
 		},
@@ -282,6 +304,11 @@
 		"subtotalLabel": "Subtotal",
 		"taxLabel": "Tax",
 		"calculatingTax": "Calculating tax"
+	},
+	"refunds": {
+		"action": "Refund payment",
+		"writeDenied": "You don't have permission to refund invoices. Ask a tenant admin for access.",
+		"unavailable": "This invoice can't be refunded."
 	},
 	"subscriptions": {
 		"title": "Subscriptions",

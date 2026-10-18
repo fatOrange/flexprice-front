@@ -14,6 +14,17 @@ export interface GetConnectionsResponse {
 	offset: number;
 }
 
+export interface WechatPayConnectionMetadata {
+	appid: string;
+	mchid: string;
+	merchant_certificate_serial_number: string;
+	merchant_private_key: string;
+	api_v3_key: string;
+	platform_public_key: string;
+	platform_public_key_id: string;
+	notify_url: string;
+}
+
 export interface CreateConnectionPayload {
 	name: string;
 	provider_type: CONNECTION_PROVIDER_TYPE;
@@ -110,6 +121,7 @@ export interface CreateConnectionPayload {
 				product_id?: string;
 				webhook_secret?: string;
 		  }
+		| ({ provider_type: CONNECTION_PROVIDER_TYPE.WECHATPAY } & WechatPayConnectionMetadata)
 		| {
 				api_key?: string;
 				webhook_secret?: string;
@@ -155,6 +167,7 @@ export interface UpdateConnectionPayload {
 				environment?: 'sandbox' | 'production';
 				income_account_id?: string;
 		  }
+		| ({ provider_type: CONNECTION_PROVIDER_TYPE.WECHATPAY } & Partial<WechatPayConnectionMetadata>)
 		| Record<string, any>;
 	sync_config?: {
 		plan?: {
