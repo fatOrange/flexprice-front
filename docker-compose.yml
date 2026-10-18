@@ -24,4 +24,6 @@ services:
 
 secrets:
   frontend_env:
-    file: .env
+    # Defaults to the local .env file. Point FRONTEND_ENV_FILE at another
+    # dotenv file (for example .env.production) for production builds.
+    file: ${FRONTEND_ENV_FILE:-.env}

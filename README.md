@@ -218,9 +218,14 @@ src/
 
 The production image is Nginx serving the compiled SPA. Vite configuration is
 baked into the browser bundle at build time, so there are no runtime `-e`
-variables: create `.env` before building and rebuild whenever it changes.
+variables: create a dotenv file before building and rebuild whenever it
+changes. Docker Compose reads `.env` by default; set `FRONTEND_ENV_FILE` to
+build from a different file.
 
 1. **Configure the frontend environment**
+
+For local development or a generic self-hosted deployment, start from the
+checked-in example:
 
 ```bash
 cp .env.example .env
@@ -233,37 +238,78 @@ VITE_APP_ENV=self-hosted
 VITE_API_URL=https://api.example.com/v1
 ```
 
+For this production deployment (`https://front.pay.zhikaoya.cn`), create a
+separate `.env.production` instead. `.env.*` is gitignored, so that file stays
+local and must exist on every build machine:
+
+```dotenv
+VITE_APP_ENV=self-hosted
+VITE_AUTH_PROVIDER=flexprice
+VITE_API_URL=https://pay.zhikaoya.cn/v1
+```
+
+Do not set `VITE_SSO_TENANT_ID` unless a single tenant should be preselected;
+without it the login page shows the SSO button on a `?sso=<tenant_id>` link.
+Do not add other tenant IDs, API keys, or secrets: every `VITE_*` value is
+compiled into the public JavaScript bundle.
+
 `VITE_API_URL` must be reachable from your users' browsers and include the
-`/v1` suffix. Only public `VITE_*` values belong in `.env`; never put server or
-API secrets there, because they are compiled into the public JavaScript bundle.
+`/v1` suffix. Only public `VITE_*` values belong in these files; never put
+server or API secrets there.
 
 2. **Build and run with Docker Compose (recommended)**
+
+Local development/default `.env`:
 
 ```bash
 docker compose up -d --build
 ```
 
-This builds the `production` target, injects `.env` as a BuildKit secret
-(`frontend_env`), and serves the app at http://localhost:3000.
-
-Docker BuildKit is required. For a direct build:
+Production `.env.production`:
 
 ```bash
-FRONTEND_CONFIG_HASH=$(openssl dgst -sha256 .env | cut -d ' ' -f2)
+FRONTEND_ENV_FILE=.env.production docker compose build
+FRONTEND_ENV_FILE=.env.production docker compose up -d
+```
+
+`FRONTEND_ENV_FILE` selects the BuildKit secret source and defaults to `.env`,
+so the local flow above is unchanged. Keep it set for both commands so Compose
+never falls back to a `.env` that may not exist on the production build host.
+Either command builds the `production` target, injects the selected file as the
+`frontend_env` secret, and serves the app at http://localhost:3000.
+
+Docker BuildKit is required. For a direct build, pass the same file explicitly:
+
+```bash
+ENV_FILE=.env.production   # or .env for local builds
+FRONTEND_CONFIG_HASH=$(openssl dgst -sha256 "$ENV_FILE" | cut -d ' ' -f2)
 
 docker build \
   --target production \
-  --secret id=frontend_env,src=.env \
+  --secret id=frontend_env,src="$ENV_FILE" \
   --build-arg FRONTEND_CONFIG_HASH="$FRONTEND_CONFIG_HASH" \
   -t flexprice-frontend .
 
 docker run -d --name flexprice-frontend -p 3000:80 flexprice-frontend
 ```
 
-The secret keeps `.env` out of the image layers, while the hash invalidates the
-cached build step when the configuration changes.
+The secret keeps the dotenv file out of the image layers, while the hash
+invalidates the cached build step when the configuration changes.
 
-3. **GitHub Actions → Huawei SWR**
+3. **Serve on the production domain**
+
+The container listens on port 3000. Terminate TLS and route
+`https://front.pay.zhikaoya.cn` through the external reverse proxy to the
+container; Nginx serves the SPA and falls back to `index.html` for client-side
+routes.
+
+SAML login returns the browser to `https://front.pay.zhikaoya.cn/auth/callback`
+(frontend route `/auth/callback`), so the backend SAML `dashboard_url` must use
+that origin and path. The API origin (`https://pay.zhikaoya.cn`) must also allow
+CORS from the frontend origin. Both are server-side settings; there is no
+frontend runtime configuration for them.
+
+4. **GitHub Actions → Huawei SWR**
 
 Pushing to `main`, or manually running the workflow from `main`, publishes a
 `linux/amd64` image built from the `production` target. Other branches are
@@ -275,14 +321,21 @@ Configure these under **Settings → Secrets and variables → Actions**:
 | -------- | --------------------- | ------------------------------------------------------------ |
 | Secret   | `SWR_USERNAME`        | Username with push access to the SWR region/org/repository   |
 | Secret   | `SWR_PASSWORD`        | Password or login token for that username                    |
-| Variable | `FRONTEND_BUILD_ENV`  | Complete `.env` contents: public `VITE_*` values only        |
+| Variable | `FRONTEND_BUILD_ENV`  | Complete dotenv contents: public `VITE_*` values only        |
 
-`FRONTEND_BUILD_ENV` is multiline dotenv content:
+`FRONTEND_BUILD_ENV` is multiline dotenv content. For this production
+deployment it must match the local `.env.production`:
 
 ```dotenv
 VITE_APP_ENV=self-hosted
-VITE_API_URL=https://api.example.com/v1
+VITE_AUTH_PROVIDER=flexprice
+VITE_API_URL=https://pay.zhikaoya.cn/v1
 ```
+
+The workflow reads `FRONTEND_BUILD_ENV`, not a dotenv file in the repository.
+Updating `.env.production` locally does not change the Actions variable; update
+it separately under repository settings and start a new workflow run. The
+workflow file itself needs no change.
 
 The repository `swr.cn-east-3.myhuaweicloud.com/digitprint/flexprice-front` must
 already exist, and the credentials must be allowed to push to that repository.
