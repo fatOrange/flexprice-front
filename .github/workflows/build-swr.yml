@@ -53,7 +53,7 @@ jobs:
           cat > "$env_file" <<'DOTENV'
           VITE_APP_ENV=self-hosted
           VITE_AUTH_PROVIDER=flexprice
-          VITE_API_URL=http://pay-jd-245-291017.tailaa2a30.ts.net:8080/v1
+          VITE_API_URL=http://pay-jd-245-291017.tailaa2a30.ts.net:8000/v1
           DOTENV
 
           # The hash is only a cache-busting key for the secret-consuming build

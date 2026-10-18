@@ -254,7 +254,7 @@ must exist on every build machine:
 ```dotenv
 VITE_APP_ENV=self-hosted
 VITE_AUTH_PROVIDER=flexprice
-VITE_API_URL=http://pay-jd-245-291017.tailaa2a30.ts.net:8080/v1
+VITE_API_URL=http://pay-jd-245-291017.tailaa2a30.ts.net:8000/v1
 ```
 
 Do not set `VITE_SSO_TENANT_ID` unless a single tenant should be preselected;
@@ -317,7 +317,7 @@ The image runs Nginx on port 80 inside the container and falls back to
 directly as host port 3000 (`3000:80`, as shown above); no reverse proxy is
 required. Clients on the tailnet open
 `http://pay-jd-245-291017.tailaa2a30.ts.net:3000`, and the browser calls the API
-directly at `http://pay-jd-245-291017.tailaa2a30.ts.net:8080/v1`.
+directly at `http://pay-jd-245-291017.tailaa2a30.ts.net:8000/v1`.
 
 Prerequisites on the Docker host:
 
@@ -326,7 +326,7 @@ Prerequisites on the Docker host:
 - MagicDNS is enabled in the tailnet so
   `pay-jd-245-291017.tailaa2a30.ts.net` resolves for clients.
 - The tailnet policy (ACL) allows the intended users, groups, or devices to
-  reach this host on TCP ports 3000 (frontend) and 8080 (API). The default
+  reach this host on TCP ports 3000 (frontend) and 8000 (API). The default
   allow-all policy already does this; a restrictive policy needs an explicit
   grant such as:
 
@@ -336,7 +336,7 @@ Prerequisites on the Docker host:
     {
       "src": ["group:flexprice-users"],
       "dst": ["tag:flexprice-front"],
-      "ip": ["tcp:3000", "tcp:8080"]
+      "ip": ["tcp:3000", "tcp:8000"]
     }
   ]
 }
@@ -347,12 +347,12 @@ host tag), and keep the grant scoped to those two ports. Tailscale ACLs only
 govern traffic on the tailnet; they do not protect the host's other network
 interfaces.
 
-**Exposure and firewall:** Docker publishes `3000:80` and `8080:8080` on all
+**Exposure and firewall:** Docker publishes `3000:80` and `8000:8080` on all
 host interfaces (IPv4 and IPv6), so both ports are reachable from any network
 the host is attached to, including a public interface. Docker inserts DNAT
 rules that can bypass host firewall input rules (plain `ufw` rules, for
 example, do not reliably filter published container ports). Restrict ports 3000
-and 8080 with the cloud security group or network firewall in front of the
+and 8000 with the cloud security group or network firewall in front of the
 host — allow them only from the tailnet or trusted networks, and verify from
 outside that both ports are closed. If the host must not be reachable outside
 the tailnet, a default-deny ingress policy for both ports is required.
@@ -386,7 +386,7 @@ CORS allowlist, and update the SAML `dashboard_url` to that HTTPS origin.
 
 Backend settings:
 
-- **CORS:** the API at `http://pay-jd-245-291017.tailaa2a30.ts.net:8080/v1`
+- **CORS:** the API at `http://pay-jd-245-291017.tailaa2a30.ts.net:8000/v1`
   must allow the exact frontend origin
   `http://pay-jd-245-291017.tailaa2a30.ts.net:3000` — scheme, host, and port,
   with no trailing slash. A wildcard is not sufficient when the browser sends
@@ -403,7 +403,7 @@ Backend settings:
 
 The API URL and origins are build-time or server-side settings; there is no
 frontend runtime configuration for them. The frontend bundle targets
-`http://pay-jd-245-291017.tailaa2a30.ts.net:8080/v1`.
+`http://pay-jd-245-291017.tailaa2a30.ts.net:8000/v1`.
 
 4. **GitHub Actions → Huawei SWR**
 
@@ -424,7 +424,7 @@ variable is needed:
 ```dotenv
 VITE_APP_ENV=self-hosted
 VITE_AUTH_PROVIDER=flexprice
-VITE_API_URL=http://pay-jd-245-291017.tailaa2a30.ts.net:8080/v1
+VITE_API_URL=http://pay-jd-245-291017.tailaa2a30.ts.net:8000/v1
 ```
 
 These are public `VITE_*` values compiled into the browser bundle. The workflow
@@ -460,7 +460,7 @@ The container's port 80 is published as host port 3000 (`3000:80`), matching
 `docker-compose.yml` and the setup scripts, and is reachable on the tailnet at
 `http://pay-jd-245-291017.tailaa2a30.ts.net:3000` without Tailscale Serve. The
 all-interface exposure, firewall, and ACL caveats from step 3 apply to this port
-and to the API on 8080.
+and to the API on 8000.
 
 Editing the inline dotenv in `.github/workflows/build-swr.yml` does not affect
 already-built images or running containers; it takes effect only on a new
