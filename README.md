@@ -425,10 +425,16 @@ variable is needed:
 VITE_APP_ENV=self-hosted
 VITE_AUTH_PROVIDER=flexprice
 VITE_API_URL=http://pay-jd-245-291017.tailaa2a30.ts.net:8000/v1
+VITE_PLATFORM_CONFIG='{"production":{"enabled":true}}'
 ```
 
 These are public `VITE_*` values compiled into the browser bundle. The workflow
-writes them to a temporary dotenv file at build time. To change them, edit the
+writes them to a temporary dotenv file at build time.
+`VITE_PLATFORM_CONFIG` enables self-service production environment creation;
+without it (or with `production.enabled` omitted/false) the frontend shows the
+contact options instead. Because it is compiled into the bundle, changing it
+requires a new build and redeploying the rebuilt image — pulled `latest` or a
+pinned version tag — before the change is visible. To change them, edit the
 `Prepare frontend configuration` step in `.github/workflows/build-swr.yml` and
 push to `main` (or start a new workflow run). The local `.env.production` is
 independent of the workflow.
